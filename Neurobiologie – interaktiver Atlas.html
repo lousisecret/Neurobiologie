@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neurobiologie – interaktiver Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f2ea; --paper:#fffdf8; --ink:#1b2220; --ink2:#4a5551; --line:#ddd6c7; --soft:#ece6d8;
+  --teal:#0f766e; --teal2:#14b8a6; --coral:#d9482b; --amber:#c98800; --violet:#6d4bc4; --green:#2f8f4e; --blue:#2b72b9;
+  --na:#d99a00; --k:#6d4bc4; --ca:#2f8f4e; --cl:#2b72b9;
+  --r:14px; --shadow:0 1px 2px rgba(40,30,10,.06),0 8px 24px rgba(40,30,10,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "IBM Plex Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:700;line-height:1.15;margin:0 0 .5em;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,4vw,3.1rem)} h2{font-size:1.75rem} h3{font-size:1.2rem}
+p{margin:0 0 1em} a{color:var(--teal)}
+code,.mono{font-family:"IBM Plex Mono",monospace;font-size:.92em}
+button{font:inherit;cursor:pointer}
+.app{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;height:100vh;overflow:auto;background:var(--ink);color:#e9e4d8;padding:22px 14px}
+.brand{font-family:Fraunces,serif;font-size:1.35rem;font-weight:700;padding:0 10px 4px;color:#fff}
+.brand small{display:block;font-family:"IBM Plex Sans";font-weight:400;font-size:.78rem;color:#9fb3ad;letter-spacing:.04em;text-transform:uppercase;margin-top:2px}
+.prog{margin:14px 10px 18px;height:6px;background:#2e3835;border-radius:9px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--teal2);transition:width .4s}
+nav.side a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;color:#d5d0c4;text-decoration:none;font-size:.95rem}
+nav.side a .n{font-family:"IBM Plex Mono";font-size:.75rem;color:#7f918c;width:20px}
+nav.side a .dot{margin-left:auto;width:7px;height:7px;border-radius:50%;background:transparent}
+nav.side a.seen .dot{background:var(--teal2)}
+nav.side a:hover{background:#26302d}
+nav.side a.active{background:var(--teal);color:#fff}
+nav.side a.active .n{color:#bfe9e3}
+nav.side .grp{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:#7f918c;margin:16px 10px 6px}
+.menuBtn{display:none}
+main{padding:40px clamp(18px,4vw,56px) 80px;max-width:1180px;width:100%}
+.view{display:none;animation:fade .35s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.kicker{font-family:"IBM Plex Mono";font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:6px}
+.lead{font-size:1.1rem;color:var(--ink2);max-width:760px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);margin-bottom:22px}
+.grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.info{background:var(--soft);border-radius:12px;padding:18px;min-height:160px}
+.info h3{margin-bottom:.3em}
+.hint{font-size:.85rem;color:var(--ink2)}
+.pill{display:inline-block;font-size:.75rem;padding:2px 9px;border-radius:99px;background:var(--soft);color:var(--ink2);margin:0 4px 4px 0;font-weight:500}
+.pill.red{background:#fbe1da;color:#9b2c16}.pill.blue{background:#dceafb;color:#1d4f86}.pill.green{background:#dcf1e2;color:#1f6236}.pill.amber{background:#fbeccb;color:#7a5200}.pill.violet{background:#e7e0fa;color:#4a2f98}
+.btn{border:1px solid var(--line);background:var(--paper);padding:8px 14px;border-radius:10px;font-weight:500;transition:.15s}
+.btn:hover{border-color:var(--teal);color:var(--teal)}
+.btn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn.pri:hover{background:#0b5f58;color:#fff}
+.btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ctrl{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;margin-bottom:12px}
+.ctrl label{font-size:.9rem;font-weight:500}
+.ctrl output{font-family:"IBM Plex Mono";font-size:.85rem;color:var(--teal)}
+.ctrl input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--teal)}
+.chk{display:flex;gap:8px;align-items:center;font-size:.92rem;margin:6px 0}
+.chk input{accent-color:var(--teal);width:16px;height:16px}
+canvas{width:100%;display:block;border-radius:10px;background:#fbfaf6;border:1px solid var(--line)}
+svg{display:block;width:100%;height:auto}
+.part{cursor:pointer;transition:filter .15s,opacity .15s}
+.part:hover{filter:brightness(1.12) drop-shadow(0 0 4px rgba(15,118,110,.5))}
+.part.sel{filter:drop-shadow(0 0 6px rgba(217,72,43,.8))}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink2);font-weight:600}
+.big{font-family:Fraunces,serif;font-size:2.3rem;font-weight:700;color:var(--teal);line-height:1}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;margin-top:26px}
+.tile{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;text-decoration:none;color:inherit;transition:.18s;position:relative}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--teal)}
+.tile .n{font-family:"IBM Plex Mono";font-size:.75rem;color:var(--teal)}
+.tile h3{margin:.25em 0 .3em}
+.tile p{font-size:.9rem;color:var(--ink2);margin:0}
+.tile.seen::after{content:"✓";position:absolute;top:14px;right:16px;color:var(--teal);font-weight:700}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.steps button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--paper);font-weight:600}
+.steps button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--ink2);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--c)}
+.callout{border-left:4px solid var(--teal);background:#e6f3f1;padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0;font-size:.95rem}
+.callout.warn{border-color:var(--coral);background:#fbe9e4}
+.phase{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+.phase div{background:var(--soft);border-radius:10px;padding:10px;font-size:.82rem;border-top:4px solid var(--c)}
+.phase b{display:block;font-size:.9rem;margin-bottom:2px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.tox{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.toxc{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px;cursor:pointer;transition:.15s}
+.toxc:hover,.toxc.sel{border-color:var(--coral);box-shadow:var(--shadow)}
+.toxc h4{margin:0 0 4px;font-family:Fraunces,serif;font-size:1.08rem}
+.toxc p{font-size:.88rem;margin:6px 0 0;color:var(--ink2)}
+.hl{fill:var(--coral)!important;opacity:.9!important}
+.q{margin-bottom:6px}
+.opts{display:grid;gap:8px;margin:14px 0}
+.opt{text-align:left;border:1px solid var(--line);background:var(--paper);padding:11px 14px;border-radius:10px}
+.opt:hover:not(:disabled){border-color:var(--teal)}
+.opt.ok{background:#dcf1e2;border-color:var(--green)}
+.opt.bad{background:#fbe1da;border-color:var(--coral)}
+.qbar{height:6px;background:var(--soft);border-radius:9px;overflow:hidden;margin-bottom:18px}.qbar i{display:block;height:100%;background:var(--teal);transition:width .3s}
+.gl input{width:100%;padding:12px 16px;border:1px solid var(--line);border-radius:12px;font:inherit;background:var(--paper);margin-bottom:16px}
+.gl dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin:0}
+.gl .term{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px}
+.gl dt{font-weight:600;font-family:Fraunces,serif;font-size:1.05rem}
+.gl dd{margin:4px 0 0;font-size:.9rem;color:var(--ink2)}
+.gl .cat{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--teal)}
+.meter{height:12px;border-radius:9px;background:var(--soft);overflow:hidden}.meter i{display:block;height:100%;background:var(--teal);transition:width .2s}
+.sep{height:1px;background:var(--line);margin:26px 0}
+.mem{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.mem div.box{flex:1;min-width:150px;background:var(--paper);border:2px solid var(--c);border-radius:12px;padding:12px;text-align:center}
+.mem .arr{font-size:1.5rem;color:var(--ink2)}
+.mem b{display:block;font-family:Fraunces,serif}
+.mem small{color:var(--ink2);font-size:.8rem}
+.foot{margin-top:40px;font-size:.82rem;color:var(--ink2)}
+@media (max-width:980px){
+  .app{grid-template-columns:1fr}
+  nav.side{position:fixed;inset:0 auto 0 0;width:270px;z-index:20;transform:translateX(-100%);transition:transform .25s}
+  nav.side.open{transform:none}
+  .menuBtn{display:inline-flex;position:fixed;top:12px;right:12px;z-index:30;background:var(--ink);color:#fff;border:0;border-radius:10px;padding:8px 13px}
+  .grid2,.grid3{grid-template-columns:1fr}.grid4{grid-template-columns:1fr 1fr}
+  .phase{grid-template-columns:1fr 1fr}
+  main{padding-top:60px}
+}
+</style>
+</head>
+<body>
+<button class="menuBtn" id="menuBtn">☰ Menü</button>
+<div class="app">
+<nav class="side" id="side">
+  <div class="brand">Neuro·Atlas<small>Neurobiologie interaktiv</small></div>
+  <div class="prog"><i id="progBar"></i></div>
+  <a href="#start" data-v="start"><span class="n">00</span>Übersicht<span class="dot"></span></a>
+  <div class="grp">Die Nervenzelle</div>
+  <a href="#neuron" data-v="neuron"><span class="n">01</span>Bau des Neurons<span class="dot"></span></a>
+  <a href="#ruhepotential" data-v="ruhepotential"><span class="n">02</span>Ruhepotential<span class="dot"></span></a>
+  <a href="#aktionspotential" data-v="aktionspotential"><span class="n">03</span>Aktionspotential<span class="dot"></span></a>
+  <a href="#leitung" data-v="leitung"><span class="n">04</span>Erregungsleitung<span class="dot"></span></a>
+  <div class="grp">Kommunikation</div>
+  <a href="#synapse" data-v="synapse"><span class="n">05</span>Synapse &amp; Summation<span class="dot"></span></a>
+  <a href="#transmitter" data-v="transmitter"><span class="n">06</span>Transmitter &amp; Gifte<span class="dot"></span></a>
+  <div class="grp">Systeme</div>
+  <a href="#gehirn" data-v="gehirn"><span class="n">07</span>Das Gehirn<span class="dot"></span></a>
+  <a href="#sinne" data-v="sinne"><span class="n">08</span>Sinne &amp; Reflexe<span class="dot"></span></a>
+  <a href="#lernen" data-v="lernen"><span class="n">09</span>Lernen &amp; Gedächtnis<span class="dot"></span></a>
+  <div class="grp">Prüfen</div>
+  <a href="#quiz" data-v="quiz"><span class="n">10</span>Quiz<span class="dot"></span></a>
+  <a href="#glossar" data-v="glossar"><span class="n">11</span>Glossar<span class="dot"></span></a>
+</nav>
+<main>
+
+<!-- ================= START ================= -->
+<section class="view" id="v-start">
+  <div class="kicker">Interaktiver Lernatlas</div>
+  <h1>Wie Nervenzellen denken, fühlen und lernen</h1>
+  <p class="lead">Vom einzelnen Ionenkanal bis zum Gedächtnis: Jedes Modul kombiniert Erklärungen mit Simulationen, die du selbst steuerst. Inhalte auf Oberstufen- bzw. Abiturniveau, mit Ausblicken darüber hinaus.</p>
+  <div class="grid4" style="margin-top:26px">
+    <div class="card" style="margin:0"><div class="big">86 Mrd.</div><div class="hint">Neuronen im menschlichen Gehirn (Schätzung)</div></div>
+    <div class="card" style="margin:0"><div class="big">−70 mV</div><div class="hint">typisches Ruhepotential</div></div>
+    <div class="card" style="margin:0"><div class="big">120 m/s</div><div class="hint">max. Leitungsgeschwindigkeit (myelinisiert)</div></div>
+    <div class="card" style="margin:0"><div class="big">~20 W</div><div class="hint">Leistungsaufnahme des Gehirns</div></div>
+  </div>
+  <div class="tiles" id="tiles"></div>
+</section>
+
+<!-- ================= NEURON ================= -->
+<section class="view" id="v-neuron">
+  <div class="kicker">Modul 01</div>
+  <h2>Bau des Neurons</h2>
+  <p class="lead">Ein Neuron empfängt Signale über die Dendriten, verrechnet sie am Axonhügel und leitet das Ergebnis über das Axon weiter. Klicke auf die Bauteile.</p>
+  <div class="card">
+    <svg viewBox="0 0 920 300" id="neuronSvg" aria-label="Schema einer Nervenzelle">
+      <defs>
+        <radialGradient id="gSoma" cx=".4" cy=".35"><stop offset="0" stop-color="#ffd9b8"/><stop offset="1" stop-color="#f0a46e"/></radialGradient>
+        <linearGradient id="gMy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6d6"/><stop offset="1" stop-color="#e6cf8a"/></linearGradient>
+      </defs>
+      <g class="part" data-part="dendrit" stroke="#e08c55" stroke-width="7" stroke-linecap="round" fill="none">
+        <path d="M130 120 L80 70 L40 50 M80 70 L70 30 M60 58 L30 75"/>
+        <path d="M120 150 L60 150 L20 135 M60 150 L25 170"/>
+        <path d="M130 182 L85 230 L45 255 M85 230 L80 275 M65 243 L30 228"/>
+        <path d="M160 105 L165 55 L140 20 M165 55 L195 25"/>
+        <path d="M165 197 L175 250 L150 285 M175 250 L205 280"/>
+      </g>
+      <g class="part" data-part="soma"><path d="M160 102 C195 100 212 125 210 150 C212 178 192 200 160 199 C127 200 110 178 112 150 C110 120 128 102 160 102Z" fill="url(#gSoma)" stroke="#c9733d" stroke-width="2"/></g>
+      <g class="part" data-part="zellkern"><circle cx="158" cy="150" r="20" fill="#8b4a8f" opacity=".85"/><circle cx="153" cy="145" r="6" fill="#c993cc"/></g>
+      <g class="part" data-part="axonhuegel"><path d="M207 135 L250 145 L250 155 L207 165 Z" fill="#f0a46e" stroke="#c9733d" stroke-width="2"/></g>
+      <g class="part" data-part="axon"><rect x="248" y="145" width="470" height="10" fill="#e08c55"/></g>
+      <g class="part" data-part="myelin">
+        <rect x="268" y="135" width="70" height="30" rx="13" fill="url(#gMy)" stroke="#c4a54f"/>
+        <rect x="352" y="135" width="70" height="30" rx="13" fill="url(#gMy)" stroke="#c4a54f"/>
+        <rect x="436" y="135" width="70" height="30" rx="13" fill="url(#gMy)" stroke="#c4a54f"/>
+        <rect x="520" y="135" width="70" height="30" rx="13" fill="url(#gMy)" stroke="#c4a54f"/>
+        <rect x="604" y="135" width="70" height="30" rx="13" fill="url(#gMy)" stroke="#c4a54f"/>
+      </g>
+      <g class="part" data-part="schwann"><ellipse cx="471" cy="133" rx="14" ry="6" fill="#4a7fbf" stroke="#2c5b93"/></g>
+      <g class="part" data-part="ranvier">
+        <rect x="338" y="141" width="14" height="18" fill="#d9482b" opacity=".75" rx="3"/>
+        <rect x="422" y="141" width="14" height="18" fill="#d9482b" opacity=".75" rx="3"/>
+        <rect x="506" y="141" width="14" height="18" fill="#d9482b" opacity=".75" rx="3"/>
+        <rect x="590" y="141" width="14" height="18" fill="#d9482b" opacity=".75" rx="3"/>
+      </g>
+      <g class="part" data-part="endknoepfchen">
+        <path d="M716 150 L770 100 L820 70 M770 100 L830 115 M716 150 L800 155 L860 145 M800 155 L850 185 M716 150 L770 205 L820 240 M770 205 L835 210" stroke="#e08c55" stroke-width="5" fill="none" stroke-linecap="round"/>
+        <g fill="#c9733d"><circle cx="822" cy="69" r="9"/><circle cx="832" cy="115" r="9"/><circle cx="862" cy="144" r="9"/><circle cx="852" cy="186" r="9"/><circle cx="822" cy="241" r="9"/><circle cx="837" cy="210" r="9"/></g>
+      </g>
+      <g font-family="IBM Plex Mono" font-size="11" fill="#4a5551" pointer-events="none">
+        <text x="10" y="20">Dendriten</text><text x="120" y="230">Soma</text><text x="215" y="125">Axonhügel</text>
+        <text x="380" y="190">Myelinscheide</text><text x="455" y="118">Schwann-Kern</text><text x="555" y="190">Ranvier-Schnürring</text><text x="790" y="290">Endknöpfchen</text>
+      </g>
+    </svg>
+  </div>
+  <div class="grid2">
+    <div class="info" id="neuronInfo"><h3>Wähle ein Bauteil</h3><p class="hint">Klicke auf eine Struktur im Schema, um Aufbau und Funktion zu sehen.</p></div>
+    <div class="card" style="margin:0">
+      <h3>Signalfluss in einem Satz</h3>
+      <p>Dendriten → Soma → Axonhügel (Integration, Auslösung des AP) → Axon (Weiterleitung) → Endknöpfchen (chemische Übertragung).</p>
+      <h3>Gliazellen</h3>
+      <p class="hint" style="margin:0">Etwa so zahlreich wie Neuronen. <b>Schwann-Zellen</b> (PNS) und <b>Oligodendrozyten</b> (ZNS) bilden Myelin, <b>Astrozyten</b> versorgen Neuronen und regulieren das Ionenmilieu, <b>Mikroglia</b> sind die Immunzellen des Gehirns.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Neuronentypen</h3>
+    <table><tr><th>Typ</th><th>Bau</th><th>Beispiel</th></tr>
+      <tr><td>Multipolar</td><td>viele Dendriten, ein Axon</td><td>Motoneuron, Pyramidenzelle</td></tr>
+      <tr><td>Bipolar</td><td>ein Dendrit, ein Axon</td><td>Bipolarzellen der Netzhaut</td></tr>
+      <tr><td>Pseudounipolar</td><td>ein Fortsatz, T-förmig geteilt</td><td>sensible Neuronen im Spinalganglion</td></tr>
+      <tr><td>Unipolar</td><td>nur ein Fortsatz</td><td>häufig bei Wirbellosen</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ================= RUHEPOTENTIAL ================= -->
+<section class="view" id="v-ruhepotential">
+  <div class="kicker">Modul 02</div>
+  <h2>Ruhepotential</h2>
+  <p class="lead">In Ruhe ist das Zellinnere gegenüber außen negativ geladen. Ursache sind ungleiche Ionenverteilungen, eine selektiv durchlässige Membran und die Na⁺/K⁺-Pumpe.</p>
+  <div class="grid2">
+    <div class="card" style="margin:0">
+      <h3>Ionenverteilung (Säugerneuron, mmol/l)</h3>
+      <table>
+        <tr><th>Ion</th><th>innen</th><th>außen</th><th>Gleichgewichtspot.</th></tr>
+        <tr><td><b style="color:var(--k)">K⁺</b></td><td>140</td><td>5</td><td class="mono" id="eK">–</td></tr>
+        <tr><td><b style="color:var(--na)">Na⁺</b></td><td>15</td><td>145</td><td class="mono" id="eNa">–</td></tr>
+        <tr><td><b style="color:var(--cl)">Cl⁻</b></td><td>10</td><td>110</td><td class="mono" id="eCl">–</td></tr>
+        <tr><td><b>A⁻</b> (Proteine)</td><td>~ 100</td><td>–</td><td class="hint">nicht membrangängig</td></tr>
+      </table>
+      <div class="callout"><b>Nernst-Gleichung</b> (37 °C): E<sub>Ion</sub> = 61,5 mV / z · log<sub>10</sub>(c<sub>außen</sub> / c<sub>innen</sub>)</div>
+      <h3>Entstehung in vier Schritten</h3>
+      <ol style="padding-left:20px;margin:0">
+        <li>Die Membran ist in Ruhe vor allem für <b>K⁺</b> durchlässig (offene Kaliumkanäle).</li>
+        <li>K⁺ diffundiert dem Konzentrationsgefälle folgend <b>nach außen</b>; die großen A⁻ bleiben zurück.</li>
+        <li>Es entsteht eine Ladungstrennung: innen negativ. Das elektrische Feld zieht K⁺ zurück.</li>
+        <li><b>Fließgleichgewicht</b>: chemischer und elektrischer Gradient heben sich nahezu auf. Leck-Einstrom von Na⁺ wird durch die <b>Na⁺/K⁺-ATPase</b> ausgeglichen (3 Na⁺ raus, 2 K⁺ rein, 1 ATP).</li>
+      </ol>
+    </div>
+    <div class="card" style="margin:0">
+      <h3>Goldman-Rechner</h3>
+      <p class="hint">Das Ruhepotential ist ein gewichtetes Mittel der Gleichgewichtspotentiale – gewichtet nach Permeabilität.</p>
+      <div class="ctrl"><label>Permeabilität P<sub>K</sub></label><output id="oPK"></output><input type="range" id="pK" min="0" max="1" step="0.01" value="1"></div>
+      <div class="ctrl"><label>Permeabilität P<sub>Na</sub></label><output id="oPNa"></output><input type="range" id="pNa" min="0" max="1" step="0.005" value="0.04"></div>
+      <div class="ctrl"><label>Permeabilität P<sub>Cl</sub></label><output id="oPCl"></output><input type="range" id="pCl" min="0" max="1" step="0.01" value="0.45"></div>
+      <div class="ctrl"><label>[K⁺] außen (mmol/l)</label><output id="oKo"></output><input type="range" id="kOut" min="1" max="140" step="1" value="5"></div>
+      <div style="text-align:center;margin:12px 0 6px"><div class="big" id="gOut">–</div><div class="hint">Membranpotential (GHK)</div></div>
+      <svg viewBox="0 0 300 50"><rect x="10" y="20" width="280" height="10" rx="5" fill="#ece6d8"/>
+        <line x1="10" x2="10" y1="15" y2="35" stroke="#999"/><text x="10" y="48" font-size="9" text-anchor="middle" fill="#666">−100</text>
+        <line x1="150" x2="150" y1="15" y2="35" stroke="#999"/><text x="150" y="48" font-size="9" text-anchor="middle" fill="#666">−25</text>
+        <line x1="290" x2="290" y1="15" y2="35" stroke="#999"/><text x="290" y="48" font-size="9" text-anchor="middle" fill="#666">+50 mV</text>
+        <circle id="gDot" cx="10" cy="25" r="8" fill="#0f766e"/></svg>
+      <div class="row" style="margin-top:8px"><button class="btn" data-preset="rest">Ruhe</button><button class="btn" data-preset="ap">AP-Spitze (P<sub>Na</sub>↑)</button><button class="btn" data-preset="hyperK">Hyperkaliämie</button></div>
+      <p class="hint" id="gExplain" style="margin-top:10px"></p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:22px">
+    <h3>Membran in Bewegung</h3>
+    <p class="hint">Teilchenansicht: K⁺ (violett) strömt durch Leckkanäle aus, Na⁺ (gelb) sickert ein, die Pumpe stellt die Gradienten wieder her. Schalte die Pumpe ab (z. B. durch Ouabain oder ATP-Mangel) und beobachte, wie die Gradienten langsam zusammenbrechen.</p>
+    <canvas id="ionCanvas" height="260"></canvas>
+    <div class="row" style="margin-top:10px"><label class="chk"><input type="checkbox" id="pumpOn" checked> Na⁺/K⁺-Pumpe aktiv</label><span class="mono hint" id="ionStat"></span></div>
+  </div>
+</section>
+
+<!-- ================= AKTIONSPOTENTIAL ================= -->
+<section class="view" id="v-aktionspotential">
+  <div class="kicker">Modul 03</div>
+  <h2>Aktionspotential – Hodgkin-Huxley-Simulation</h2>
+  <p class="lead">Das Aktionspotential folgt dem <b>Alles-oder-Nichts-Prinzip</b>: Erst wenn der Schwellenwert (≈ −55 mV) überschritten wird, öffnen spannungsgesteuerte Na⁺-Kanäle lawinenartig. Die Simulation löst die originalen Hodgkin-Huxley-Gleichungen (Tintenfisch-Riesenaxon, 1952).</p>
+  <div class="grid2">
+    <div>
+      <canvas id="apCanvas" height="330"></canvas>
+      <div class="legend"><span style="--c:#1b2220">Membranpotential</span><span style="--c:#c98800">g<sub>Na</sub></span><span style="--c:#6d4bc4">g<sub>K</sub></span><span style="--c:#d9482b">Reiz</span></div>
+    </div>
+    <div class="card" style="margin:0">
+      <div class="ctrl"><label>Reiz 1 – Stärke</label><output id="oS1"></output><input type="range" id="s1" min="0" max="40" step="0.5" value="10"></div>
+      <div class="ctrl"><label>Reizdauer</label><output id="oDur"></output><input type="range" id="dur" min="0.2" max="5" step="0.1" value="1"></div>
+      <div class="ctrl"><label>Reiz 2 – Stärke</label><output id="oS2"></output><input type="range" id="s2" min="0" max="40" step="0.5" value="0"></div>
+      <div class="ctrl"><label>Abstand Reiz 2</label><output id="oDel"></output><input type="range" id="del" min="1" max="30" step="0.5" value="12"></div>
+      <label class="chk"><input type="checkbox" id="ttx"> Tetrodotoxin (blockiert Na⁺-Kanäle)</label>
+      <label class="chk"><input type="checkbox" id="tea"> TEA (blockiert K⁺-Kanäle)</label>
+      <label class="chk"><input type="checkbox" id="cond" checked> Leitfähigkeiten anzeigen</label>
+      <label class="chk"><input type="checkbox" id="dauer"> Dauerreiz (Frequenzcodierung)</label>
+      <div class="row" style="margin-top:8px"><button class="btn" data-ap="sub">unterschwellig</button><button class="btn" data-ap="supra">überschwellig</button><button class="btn" data-ap="refr">Refraktärzeit</button></div>
+      <p class="hint" id="apMsg" style="margin-top:10px"></p>
+    </div>
+  </div>
+  <div class="phase">
+    <div style="--c:#2b72b9"><b>1 · Ruhe</b>−70 mV. Na⁺-Kanäle geschlossen, aber aktivierbar.</div>
+    <div style="--c:#c98800"><b>2 · Depolarisation</b>Schwelle überschritten → Na⁺-Kanäle öffnen, Na⁺ strömt ein (positive Rückkopplung).</div>
+    <div style="--c:#d9482b"><b>3 · Overshoot</b>Bis ca. +30 mV. Na⁺-Kanäle inaktivieren (Inaktivierungstor schließt).</div>
+    <div style="--c:#6d4bc4"><b>4 · Repolarisation</b>Verzögerte K⁺-Kanäle öffnen, K⁺ strömt aus.</div>
+    <div style="--c:#0f766e"><b>5 · Hyperpolarisation</b>K⁺-Kanäle schließen langsam → kurz unter −70 mV. Refraktärzeit.</div>
+  </div>
+  <div class="grid2" style="margin-top:22px">
+    <div class="card" style="margin:0">
+      <h3>Refraktärzeit</h3>
+      <p><b>Absolut</b> (~1–2 ms): Na⁺-Kanäle sind inaktiviert – kein neues AP möglich, egal wie stark der Reiz.<br><b>Relativ</b> (~2–4 ms): Ein Teil der Kanäle ist wieder aktivierbar, K⁺-Leitfähigkeit noch erhöht – nur stärkere Reize lösen ein (kleineres) AP aus.</p>
+      <p class="hint" style="margin:0">Folgen: maximale AP-Frequenz (~500 Hz) und gerichtete Erregungsleitung (kein Zurücklaufen).</p>
+    </div>
+    <div class="card" style="margin:0">
+      <h3>Spannungsgesteuerter Na⁺-Kanal</h3>
+      <svg viewBox="0 0 330 140" id="chanSvg">
+        <rect x="0" y="45" width="330" height="50" fill="#f0e3c4"/>
+        <text x="4" y="40" font-size="10" fill="#666">außen</text><text x="4" y="110" font-size="10" fill="#666">innen</text>
+        <g id="chanStates"></g>
+      </svg>
+      <p class="hint" style="margin:0">Aktivierungstor (m) und Inaktivierungstor (h): <b>geschlossen</b> → <b>offen</b> → <b>inaktiviert</b> → (Repolarisation) → geschlossen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LEITUNG ================= -->
+<section class="view" id="v-leitung">
+  <div class="kicker">Modul 04</div>
+  <h2>Erregungsleitung</h2>
+  <p class="lead">Ein AP depolarisiert durch Ausgleichsströme die benachbarte Membran über die Schwelle. Ohne Myelin geschieht das Stück für Stück, mit Myelin springt die Erregung von Schnürring zu Schnürring.</p>
+  <div class="card">
+    <canvas id="condCanvas" height="300"></canvas>
+    <div class="row" style="margin-top:12px">
+      <button class="btn pri" id="condGo">▶ Reiz setzen</button>
+      <label class="chk"><input type="checkbox" id="condSlow" checked> Zeitlupe</label>
+      <label class="chk"><input type="checkbox" id="condMS"> Demyelinisierung (Multiple Sklerose) simulieren</label>
+      <span class="mono hint" id="condT"></span>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="card"><h3>Kontinuierlich</h3><p class="hint" style="margin:0">Marklose Fasern. AP wird an jeder Membranstelle neu gebildet. Langsam (0,5–2 m/s), energieaufwendig. Schneller nur durch größeren Durchmesser (Tintenfisch: bis 1 mm).</p></div>
+    <div class="card"><h3>Saltatorisch</h3><p class="hint" style="margin:0">Myelinisierte Fasern. Myelin isoliert, Ausgleichsströme fließen bis zum nächsten Schnürring (1–2 mm), nur dort entstehen APs. Bis 120 m/s, weniger Ionen müssen zurückgepumpt werden.</p></div>
+    <div class="card"><h3>Einflussgrößen</h3><p class="hint" style="margin:0">↑ Durchmesser (geringerer Innenwiderstand), ↑ Myelinisierung (geringere Kapazität, höherer Membranwiderstand), ↑ Temperatur (schnellere Kanalkinetik).</p></div>
+  </div>
+</section>
+
+<!-- ================= SYNAPSE ================= -->
+<section class="view" id="v-synapse">
+  <div class="kicker">Modul 05</div>
+  <h2>Die chemische Synapse</h2>
+  <p class="lead">Am Beispiel der cholinergen (motorischen) Endplatte: Das elektrische Signal wird in ein chemisches übersetzt und wieder zurück. Gehe die Schritte durch.</p>
+  <div class="grid2">
+    <div class="card" style="margin:0;padding:12px">
+      <svg viewBox="0 0 600 430" id="synSvg">
+        <defs><linearGradient id="gPre" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe3cc"/><stop offset="1" stop-color="#f5c49b"/></linearGradient>
+        <linearGradient id="gPost" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4ece8"/><stop offset="1" stop-color="#b6dcd5"/></linearGradient></defs>
+        <path d="M220 0 L380 0 L380 60 C470 70 520 130 520 195 L80 195 C80 130 130 70 220 60 Z" fill="url(#gPre)" stroke="#c9733d" stroke-width="3"/>
+        <rect id="apBand" x="222" y="0" width="156" height="16" fill="#d9482b" opacity="0"/>
+        <path id="postMem" d="M40 232 L560 232 L560 430 L40 430 Z" fill="url(#gPost)" stroke="#0f766e" stroke-width="3"/>
+        <text x="585" y="218" text-anchor="end" font-size="11" fill="#888" font-family="IBM Plex Mono">Spalt ~20 nm</text>
+        <text x="30" y="20" font-size="13" fill="#7a4a24" font-family="IBM Plex Mono">präsynaptisch</text>
+        <text x="50" y="420" font-size="13" fill="#0b5f58" font-family="IBM Plex Mono">postsynaptisch</text>
+        <g id="caCh"><rect x="110" y="180" width="18" height="22" rx="4" fill="#2f8f4e"/><rect x="472" y="180" width="18" height="22" rx="4" fill="#2f8f4e"/></g>
+        <g id="caIons" fill="#2f8f4e"></g>
+        <g id="vesicles"></g>
+        <g id="receptors"></g>
+        <g id="ache" fill="#c98800"><path d="M170 222 l8 -8 l8 8 l-8 8z"/><path d="M420 222 l8 -8 l8 8 l-8 8z"/><path d="M300 222 l8 -8 l8 8 l-8 8z"/></g>
+        <g id="ach" fill="#d9482b"></g>
+        <g id="naIons" fill="#c98800"></g>
+        <path id="reupt" d="M300 210 C300 180 330 165 350 150" stroke="#0f766e" stroke-width="3" fill="none" marker-end="url(#arrowT)" opacity="0"/>
+        <defs><marker id="arrowT" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#0f766e"/></marker></defs>
+        <g id="epspTag" opacity="0"><rect x="215" y="330" width="170" height="34" rx="8" fill="#0f766e"/><text x="300" y="352" fill="#fff" text-anchor="middle" font-size="14" font-family="IBM Plex Sans" font-weight="600">EPSP → Endplattenpot.</text></g>
+      </svg>
+    </div>
+    <div>
+      <div class="steps" id="synSteps"></div>
+      <div class="info" id="synInfo"></div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="synPrev">← zurück</button><button class="btn pri" id="synNext">weiter →</button><button class="btn" id="synAuto">▶ Autoplay</button></div>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <h2>Räumliche &amp; zeitliche Summation</h2>
+  <p class="lead">Ein einzelnes EPSP (≈ +5 mV) reicht nicht für ein AP. Am Axonhügel werden alle eintreffenden Potentiale verrechnet. Löse Synapsen aus und versuche, die Schwelle zu erreichen.</p>
+  <div class="grid2">
+    <div><canvas id="sumCanvas" height="300"></canvas></div>
+    <div class="card" style="margin:0">
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn" data-syn="A" style="border-color:#2f8f4e">⚡ A (erregend, nah)</button>
+        <button class="btn" data-syn="B" style="border-color:#2f8f4e">⚡ B (erregend, fern)</button>
+        <button class="btn" data-syn="C" style="border-color:#2b72b9">⛔ C (hemmend)</button>
+      </div>
+      <div class="row" style="margin-bottom:12px">
+        <button class="btn" data-combo="temporal">Zeitliche Summation</button>
+        <button class="btn" data-combo="spatial">Räumliche Summation</button>
+        <button class="btn" data-combo="inhib">Hemmung</button>
+      </div>
+      <p class="hint" id="sumMsg">Tipp: Klicke A mehrmals schnell hintereinander.</p>
+      <div class="callout"><b>EPSP</b>: Öffnung von Na⁺/Kationen-Kanälen → Depolarisation.<br><b>IPSP</b>: Öffnung von Cl⁻- oder K⁺-Kanälen → Hyperpolarisation bzw. Stabilisierung.<br>Ferne Synapsen wirken schwächer, weil sich Potentiale <b>elektrotonisch</b> (mit Verlust) ausbreiten.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TRANSMITTER ================= -->
+<section class="view" id="v-transmitter">
+  <div class="kicker">Modul 06</div>
+  <h2>Neurotransmitter, Drogen &amp; Synapsengifte</h2>
+  <p class="lead">Ob eine Synapse erregt oder hemmt, entscheidet nicht der Transmitter allein, sondern der <b>Rezeptor</b>. Viele Gifte und Medikamente greifen gezielt an einem Schritt der Übertragung an.</p>
+  <div class="card">
+    <table id="ntTable"><tr><th>Transmitter</th><th>Typ</th><th>Wirkung</th><th>Vorkommen / Funktion</th></tr></table>
+  </div>
+  <h3>Wirkorte von Giften &amp; Pharmaka</h3>
+  <div class="grid2">
+    <div>
+      <div class="filters" id="toxFilters"></div>
+      <div class="tox" id="toxList"></div>
+    </div>
+    <div style="position:sticky;top:20px">
+      <div class="card" style="margin:0;padding:12px">
+        <svg viewBox="0 0 400 330" id="toxSvg">
+          <path d="M140 0 L260 0 L260 40 C330 50 360 100 360 150 L40 150 C40 100 70 50 140 40Z" fill="#fde7d4" stroke="#c9733d" stroke-width="2"/>
+          <rect data-site="nachannel" x="141" y="10" width="14" height="22" rx="3" fill="#c98800" opacity=".55"/>
+          <rect data-site="nachannel" x="245" y="10" width="14" height="22" rx="3" fill="#c98800" opacity=".55"/>
+          <rect data-site="cachannel" x="62" y="125" width="14" height="22" rx="3" fill="#2f8f4e" opacity=".55"/>
+          <g data-site="vesikel" fill="#f2b98e" stroke="#c9733d" opacity=".75"><circle cx="160" cy="95" r="15"/><circle cx="200" cy="80" r="15"/><circle cx="240" cy="100" r="15"/><circle cx="200" cy="120" r="15"/></g>
+          <rect data-site="reuptake" x="315" y="122" width="16" height="26" rx="4" fill="#0f766e" opacity=".55"/>
+          <rect x="0" y="150" width="400" height="30" fill="#fff"/>
+          <g data-site="enzym" fill="#c98800" opacity=".55"><path d="M110 165 l7 -7 l7 7 l-7 7z"/><path d="M280 165 l7 -7 l7 7 l-7 7z"/></g>
+          <path d="M20 180 L380 180 L380 330 L20 330Z" fill="#d4ece8" stroke="#0f766e" stroke-width="2"/>
+          <g data-site="rezeptor" fill="#0f766e" opacity=".55"><rect x="150" y="174" width="16" height="26" rx="4"/><rect x="192" y="174" width="16" height="26" rx="4"/><rect x="234" y="174" width="16" height="26" rx="4"/></g>
+          <g font-size="10" fill="#555" font-family="IBM Plex Mono">
+            <text x="160" y="40">Na⁺-Kanäle</text><text x="12" y="118">Ca²⁺-Kanal</text><text x="165" y="64">Vesikel</text><text x="290" y="115">Transporter</text><text x="100" y="152">Enzym</text><text x="150" y="218">Rezeptoren</text>
+          </g>
+        </svg>
+        <div class="info" id="toxInfo" style="min-height:120px;margin-top:10px"><h3>Wähle eine Substanz</h3><p class="hint">Der Wirkort wird im Schema rot markiert.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout warn">Begriffe: <b>Agonist</b> = ahmt den Transmitter nach (aktiviert den Rezeptor). <b>Antagonist</b> = besetzt den Rezeptor, ohne ihn zu aktivieren (kompetitive Hemmung). <b>Schlaffe Lähmung</b> = Muskeln können nicht mehr erregt werden; <b>spastische Lähmung</b> = Dauerkontraktion.</div>
+</section>
+
+<!-- ================= GEHIRN ================= -->
+<section class="view" id="v-gehirn">
+  <div class="kicker">Modul 07</div>
+  <h2>Das Gehirn</h2>
+  <p class="lead">Seitenansicht der linken Hemisphäre (vorne = links). Klicke auf Lappen und Areale, oder blende die Funktionsareale ein.</p>
+  <div class="grid2">
+    <div class="card" style="margin:0">
+      <svg viewBox="40 10 540 410" id="brainSvg">
+        <defs>
+          <clipPath id="cereClip"><path id="cereShape" d="M95 240 C55 180 75 90 170 52 C250 20 380 22 452 58 C530 98 562 170 538 238 C522 282 474 300 436 296 C404 322 340 330 300 316 C258 310 232 300 210 286 C178 296 118 292 95 240Z"/></clipPath>
+          <pattern id="gyri" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M0 17 C8 5 17 29 26 17 S34 5 34 17" stroke="rgba(0,0,0,.09)" stroke-width="2" fill="none"/></pattern>
+        </defs>
+        <path class="part" data-region="hirnstamm" d="M352 300 L398 296 C404 340 398 380 392 418 L360 418 C362 378 356 340 352 300Z" fill="#b9a7d9" stroke="#6d4bc4" stroke-width="2"/>
+        <g clip-path="url(#cereClip)">
+          <polygon class="part" data-region="frontal" points="0,0 305,0 252,214 176,236 0,300" fill="#9ccfc6"/>
+          <polygon class="part" data-region="parietal" points="305,0 472,0 456,202 402,200 252,214" fill="#f2c88f"/>
+          <polygon class="part" data-region="okzipital" points="472,0 600,0 600,420 440,300 456,202" fill="#e9a6a0"/>
+          <polygon class="part" data-region="temporal" points="0,300 176,236 252,214 402,200 456,202 440,300 430,420 0,420" fill="#b5c9ec"/>
+          <rect x="0" y="0" width="600" height="420" fill="url(#gyri)" pointer-events="none"/>
+          <g id="areas" opacity="0" style="transition:opacity .3s">
+            <path class="part" data-region="motor" d="M282 30 L300 30 L246 214 L230 214Z" fill="#d9482b" opacity=".8"/>
+            <path class="part" data-region="somato" d="M302 30 L322 32 L266 214 L250 214Z" fill="#c98800" opacity=".85"/>
+            <ellipse class="part" data-region="broca" cx="196" cy="205" rx="26" ry="18" fill="#6d4bc4" opacity=".85"/>
+            <ellipse class="part" data-region="wernicke" cx="405" cy="222" rx="28" ry="18" fill="#2b72b9" opacity=".85"/>
+            <ellipse class="part" data-region="visuell" cx="525" cy="200" rx="22" ry="40" fill="#2f8f4e" opacity=".85"/>
+            <ellipse class="part" data-region="hoer" cx="320" cy="240" rx="34" ry="12" fill="#0f766e" opacity=".85"/>
+            <ellipse class="part" data-region="praefrontal" cx="120" cy="130" rx="40" ry="55" fill="#14b8a6" opacity=".55"/>
+          </g>
+        </g>
+        <use href="#cereShape" fill="none" stroke="#1b2220" stroke-width="3"/>
+        <path d="M305 22 L252 214" stroke="#1b2220" stroke-width="2.5" fill="none" stroke-dasharray="6 4" pointer-events="none"/>
+        <path d="M176 236 C250 210 360 200 456 202" stroke="#1b2220" stroke-width="2.5" fill="none" pointer-events="none"/>
+        <path class="part" data-region="kleinhirn" d="M404 302 C440 282 520 272 538 300 C548 342 494 368 442 358 C412 348 398 324 404 302Z" fill="#d7a6c9" stroke="#8b4a8f" stroke-width="2"/>
+        <g stroke="rgba(0,0,0,.18)" fill="none" pointer-events="none"><path d="M418 312 C460 300 510 296 532 306"/><path d="M420 326 C460 316 510 314 536 322"/><path d="M428 340 C465 334 505 334 528 338"/></g>
+        <g font-size="12" font-family="IBM Plex Mono" fill="#1b2220" pointer-events="none" id="brainLabels">
+          <text x="120" y="160">Frontallappen</text><text x="340" y="110">Parietallappen</text><text x="480" y="150">Okzipital</text><text x="250" y="275">Temporallappen</text><text x="438" y="390">Kleinhirn</text><text x="320" y="410">Hirnstamm</text>
+        </g>
+      </svg>
+      <div class="row" style="margin-top:8px"><label class="chk"><input type="checkbox" id="showAreas"> Funktionsareale einblenden</label></div>
+    </div>
+    <div class="info" id="brainInfo"><h3>Wähle eine Region</h3><p class="hint">Das Großhirn (Telencephalon) macht ca. 85 % der Hirnmasse aus. Seine Rinde (Cortex) ist 2–4 mm dick und durch Furchen stark vergrößert (~2 500 cm²).</p></div>
+  </div>
+  <h3 style="margin-top:26px">Innere Strukturen</h3>
+  <div class="tox" id="innerList"></div>
+</section>
+
+<!-- ================= SINNE ================= -->
+<section class="view" id="v-sinne">
+  <div class="kicker">Modul 08</div>
+  <h2>Sinneszellen, Codierung &amp; Reflexe</h2>
+  <p class="lead">Sinneszellen wandeln Reize in elektrische Signale um (<b>Transduktion</b>). Die Reizstärke wird zuerst als Amplitude (Rezeptorpotential), dann als Frequenz (Aktionspotentiale) codiert.</p>
+  <div class="grid2">
+    <div><canvas id="codeCanvas" height="300"></canvas></div>
+    <div class="card" style="margin:0">
+      <div class="ctrl"><label>Reizstärke</label><output id="oStim"></output><input type="range" id="stim" min="0" max="100" value="40"></div>
+      <label class="chk"><input type="checkbox" id="adapt"> Adaptation (phasisch-tonischer Rezeptor)</label>
+      <div style="margin:14px 0 6px" class="hint">Rezeptorpotential</div><div class="meter"><i id="mRP"></i></div>
+      <div style="margin:12px 0 6px" class="hint">AP-Frequenz: <b class="mono" id="freqOut">0 Hz</b></div><div class="meter"><i id="mF" style="background:var(--coral)"></i></div>
+      <p class="hint" style="margin-top:14px">Analog → digital: Das Rezeptorpotential ist abgestuft (amplitudenmoduliert), APs sind gleich groß – Information steckt in ihrer <b>Frequenz</b> (frequenzmoduliert). Der Zusammenhang ist annähernd logarithmisch (Weber-Fechner).</p>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <h2>Der Kniesehnenreflex</h2>
+  <p class="lead">Ein <b>monosynaptischer Eigenreflex</b>: Rezeptor und Effektor liegen im selben Muskel. Gleichzeitig wird der Gegenspieler über ein hemmendes Interneuron entspannt (reziproke Hemmung).</p>
+  <div class="grid2">
+    <div class="card" style="margin:0">
+      <svg viewBox="0 0 620 360" id="reflexSvg">
+        <path d="M60 40 L60 330" stroke="#d8c4a4" stroke-width="40" stroke-linecap="round"/>
+        <ellipse cx="105" cy="160" rx="34" ry="110" fill="#e9a6a0" stroke="#b5544a" stroke-width="2"/>
+        <ellipse cx="22" cy="160" rx="18" ry="95" fill="#c7b8e4" stroke="#6d4bc4" stroke-width="2"/>
+        <ellipse id="spindle" cx="108" cy="150" rx="7" ry="26" fill="#fff" stroke="#b5544a" stroke-width="2"/>
+        <text x="80" y="300" font-size="11" font-family="IBM Plex Mono">Strecker</text><text x="0" y="280" font-size="11" font-family="IBM Plex Mono">Beuger</text>
+        <path d="M70 330 C70 350 110 350 110 335" stroke="#555" stroke-width="2" fill="none"/>
+        <g id="hammer" style="transition:transform .25s;transform-origin:150px 340px"><rect x="140" y="320" width="60" height="16" rx="4" fill="#555"/><rect x="195" y="300" width="14" height="56" rx="4" fill="#333"/></g>
+        <g transform="translate(470 175)"><ellipse rx="110" ry="85" fill="#f4efe6" stroke="#888" stroke-width="2"/>
+          <path d="M-12 -55 C-50 -70 -60 -20 -30 -5 C-60 10 -60 60 -18 55 C-8 30 8 30 18 55 C60 60 60 10 30 -5 C60 -20 50 -70 12 -55 C6 -30 -6 -30 -12 -55Z" fill="#d9d1c2" stroke="#999"/>
+          <text x="-25" y="-95" font-size="11" font-family="IBM Plex Mono">Rückenmark</text></g>
+        <circle cx="398" cy="95" r="13" fill="#f0a46e" stroke="#c9733d" stroke-width="2"/><text x="350" y="72" font-size="10" font-family="IBM Plex Mono">Spinalganglion</text>
+        <path id="pAff" d="M115 150 C200 100 300 90 385 95 C420 97 445 120 455 145 C462 170 470 190 478 205" stroke="#2f8f4e" stroke-width="4" fill="none"/>
+        <path id="pEff" d="M478 210 C440 250 330 260 230 230 C180 215 150 200 125 175" stroke="#d9482b" stroke-width="4" fill="none"/>
+        <path id="pInt" d="M462 175 C450 195 440 205 432 215" stroke="#2b72b9" stroke-width="3" fill="none"/>
+        <path id="pInh" d="M432 222 C380 300 200 320 40 220" stroke="#6d4bc4" stroke-width="3" fill="none" stroke-dasharray="6 4"/>
+        <circle cx="480" cy="210" r="11" fill="#d9482b"/><circle cx="432" cy="220" r="8" fill="#2b72b9"/>
+        <g id="pulses"></g>
+        <g font-size="10" font-family="IBM Plex Mono" fill="#333"><text x="230" y="85" fill="#2f8f4e">afferent (sensibel)</text><text x="250" y="270" fill="#d9482b">efferent (motorisch)</text><text x="300" y="315" fill="#6d4bc4">gehemmt</text><text x="490" y="230">α-Motoneuron</text><text x="380" y="245" fill="#2b72b9">Interneuron</text></g>
+      </svg>
+      <div class="row"><button class="btn pri" id="reflexGo">🔨 Auf die Sehne klopfen</button><span class="hint" id="reflexT"></span></div>
+    </div>
+    <div class="card" style="margin:0">
+      <h3>Ablauf</h3>
+      <ol style="padding-left:20px">
+        <li>Schlag dehnt die Patellarsehne → Strecker wird gedehnt.</li>
+        <li><b>Muskelspindeln</b> registrieren die Dehnung → Rezeptorpotential → APs.</li>
+        <li>Afferente Faser leitet über die <b>Hinterwurzel</b> ins Rückenmark.</li>
+        <li>Direkte Umschaltung auf das <b>α-Motoneuron</b> im Vorderhorn (1 Synapse).</li>
+        <li>Efferente Faser → motorische Endplatte → Strecker kontrahiert, Bein schnellt vor.</li>
+        <li>Parallel: hemmendes Interneuron → Beuger entspannt.</li>
+      </ol>
+      <h3>Eigen- vs. Fremdreflex</h3>
+      <p class="hint" style="margin:0"><b>Eigenreflex</b>: monosynaptisch, nicht ermüdbar, schnell (~20–30 ms). <b>Fremdreflex</b> (z. B. Lidschluss, Rückziehreflex): polysynaptisch, Rezeptor und Effektor in verschiedenen Organen, ermüdbar, Reflexzeit variabel.</p>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <h2>Das Auge: Fototransduktion</h2>
+  <div class="grid2">
+    <div class="card" style="margin:0">
+      <h3>Signalkaskade im Stäbchen</h3>
+      <ol style="padding-left:20px;margin:0" id="photoSteps">
+        <li>Licht → <b>11-cis-Retinal</b> wird zu all-trans-Retinal → Rhodopsin aktiviert (Meta-Rhodopsin II).</li>
+        <li>Aktiviert das G-Protein <b>Transducin</b> (ein Rhodopsin → hunderte Transducine: Verstärkung).</li>
+        <li>Transducin aktiviert die <b>Phosphodiesterase (PDE)</b>.</li>
+        <li>PDE spaltet <b>cGMP</b> → GMP; cGMP-Spiegel sinkt.</li>
+        <li>cGMP-gesteuerte Na⁺-Kanäle schließen → <b>Hyperpolarisation</b> (−40 → −70 mV).</li>
+        <li>Weniger Glutamat-Ausschüttung an die Bipolarzelle → Signal.</li>
+      </ol>
+      <div class="callout">Besonderheit: Im Dunkeln ist das Stäbchen <b>depolarisiert</b> (Dunkelstrom) und schüttet ständig Transmitter aus. Licht <b>hyperpolarisiert</b>.</div>
+    </div>
+    <div class="card" style="margin:0">
+      <table><tr><th></th><th>Stäbchen</th><th>Zapfen</th></tr>
+        <tr><td>Anzahl</td><td>~120 Mio.</td><td>~6 Mio.</td></tr>
+        <tr><td>Lage</td><td>Peripherie</td><td>gehäuft in der Fovea</td></tr>
+        <tr><td>Empfindlichkeit</td><td>sehr hoch (Dämmerung)</td><td>gering (Tageslicht)</td></tr>
+        <tr><td>Farbe</td><td>keine (ein Pigment)</td><td>3 Typen: S (~420 nm), M (~530 nm), L (~560 nm)</td></tr>
+        <tr><td>Verschaltung</td><td>stark konvergent</td><td>in der Fovea ~1:1</td></tr>
+        <tr><td>Auflösung</td><td>gering</td><td>hoch</td></tr>
+      </table>
+      <p class="hint" style="margin:12px 0 0"><b>Laterale Hemmung</b> durch Horizontalzellen verstärkt Kontraste an Hell-Dunkel-Grenzen (z. B. Machsche Bänder).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LERNEN ================= -->
+<section class="view" id="v-lernen">
+  <div class="kicker">Modul 09</div>
+  <h2>Lernen &amp; Gedächtnis</h2>
+  <p class="lead">Lernen heißt: Synapsen verändern ihre Stärke (<b>synaptische Plastizität</b>). „Neurons that fire together, wire together“ – die Hebb'sche Regel (1949).</p>
+  <h3>Mehrspeichermodell</h3>
+  <div class="mem">
+    <div class="box" style="--c:#c98800"><b>Sensorisches Gedächtnis</b><small>Ultrakurzzeit · &lt; 1 s (ikonisch) bis ~2 s (echoisch)</small></div><div class="arr">→</div>
+    <div class="box" style="--c:#0f766e"><b>Kurzzeit-/Arbeitsgedächtnis</b><small>Sekunden bis Minuten · ca. 7 ± 2 Einheiten</small></div><div class="arr">→</div>
+    <div class="box" style="--c:#6d4bc4"><b>Langzeitgedächtnis</b><small>unbegrenzt · deklarativ &amp; prozedural</small></div>
+  </div>
+  <p class="hint">Aufmerksamkeit filtert, Wiederholung und Konsolidierung (u. a. im <b>Hippocampus</b>, besonders im Schlaf) überführen Inhalte ins Langzeitgedächtnis.</p>
+  <div class="grid2" style="margin-top:22px">
+    <div class="card" style="margin:0">
+      <h3>NMDA-Rezeptor: der Koinzidenzdetektor</h3>
+      <svg viewBox="0 0 360 230" id="nmdaSvg">
+        <rect x="0" y="80" width="360" height="70" fill="#f0e3c4"/>
+        <text x="6" y="72" font-size="11" fill="#666">synaptischer Spalt</text><text x="6" y="168" font-size="11" fill="#666">Postsynapse</text>
+        <rect x="140" y="70" width="30" height="90" rx="8" fill="#0f766e"/><rect x="190" y="70" width="30" height="90" rx="8" fill="#0f766e"/>
+        <circle id="gluDot" cx="180" cy="55" r="9" fill="#d9482b"/><text id="gluLbl" x="196" y="52" font-size="10" fill="#d9482b">Glutamat</text>
+        <circle id="mgDot" cx="180" cy="120" r="10" fill="#555"/><text id="mgLbl" x="228" y="124" font-size="10" fill="#555">Mg²⁺-Block</text>
+        <g id="caFlow" fill="#2f8f4e"></g>
+        <text x="180" y="215" text-anchor="middle" font-size="13" font-family="IBM Plex Mono" id="nmdaState" fill="#1b2220"></text>
+      </svg>
+      <label class="chk"><input type="checkbox" id="gluOn"> Glutamat gebunden (präsynaptische Aktivität)</label>
+      <div class="ctrl"><label>Postsynaptisches Potential</label><output id="oVpost"></output><input type="range" id="vpost" min="-80" max="0" value="-70"></div>
+      <div class="hint">Offene NMDA-Kanäle: <b class="mono" id="nmdaPct">0 %</b></div>
+      <div class="meter" style="margin-top:6px"><i id="mNmda" style="background:var(--green)"></i></div>
+    </div>
+    <div class="card" style="margin:0">
+      <h3>Langzeitpotenzierung (LTP)</h3>
+      <ol style="padding-left:20px">
+        <li>Glutamat aktiviert <b>AMPA-Rezeptoren</b> → Na⁺-Einstrom → Depolarisation.</li>
+        <li>Nur bei starker Depolarisation (viele Synapsen gleichzeitig aktiv) wird der <b>Mg²⁺-Block</b> aus dem NMDA-Kanal gedrängt.</li>
+        <li>Gleichzeitig Glutamat <i>und</i> Depolarisation → NMDA öffnet → <b>Ca²⁺-Einstrom</b>.</li>
+        <li>Ca²⁺ aktiviert Kinasen (CaMKII) → zusätzliche AMPA-Rezeptoren werden in die Membran eingebaut.</li>
+        <li>Spätphase: Genexpression, neue Proteine, Wachstum neuer Synapsen → dauerhafte Verstärkung.</li>
+      </ol>
+      <div class="callout">Das Gegenstück ist die <b>Langzeitdepression (LTD)</b>: schwache, unkoordinierte Aktivität schwächt Synapsen ab – ebenso wichtig, damit das Netz nicht „übersättigt“.</div>
+    </div>
+  </div>
+  <div class="grid3" style="margin-top:22px">
+    <div class="card"><h3>Gedächtnisformen</h3><p class="hint" style="margin:0"><b>Deklarativ</b> (bewusst): episodisch (Erlebnisse) und semantisch (Fakten) – Hippocampus, Cortex.<br><b>Nicht-deklarativ</b>: prozedural (Fahrradfahren – Basalganglien, Kleinhirn), Priming, Konditionierung.</p></div>
+    <div class="card"><h3>Patient H. M.</h3><p class="hint" style="margin:0">Nach Entfernung beider Hippocampi (1953) konnte er keine neuen deklarativen Erinnerungen bilden (anterograde Amnesie), lernte aber neue motorische Fähigkeiten. Beleg für getrennte Gedächtnissysteme.</p></div>
+    <div class="card"><h3>Aplysia &amp; Kandel</h3><p class="hint" style="margin:0">An der Meeresschnecke zeigte Eric Kandel Habituation und Sensitisierung auf Synapsenebene (Nobelpreis 2000): Kurzzeitgedächtnis = Änderung vorhandener Proteine, Langzeitgedächtnis = Genexpression und neue Synapsen.</p></div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="view" id="v-quiz">
+  <div class="kicker">Modul 10</div>
+  <h2>Wissens-Check</h2>
+  <div class="row" style="margin-bottom:16px" id="quizTopics"></div>
+  <div class="card" id="quizBox"></div>
+</section>
+
+<!-- ================= GLOSSAR ================= -->
+<section class="view gl" id="v-glossar">
+  <div class="kicker">Modul 11</div>
+  <h2>Glossar</h2>
+  <input type="search" id="glSearch" placeholder="Begriff suchen … (z. B. Synapse, Schwelle, cGMP)">
+  <dl id="glList"></dl>
+</section>
+
+<div class="foot">Neuro·Atlas · Lernwebapp · Werte sind typische Lehrbuchwerte und können je nach Zelltyp abweichen.</div>
+</main>
+</div>
+<script>
+const MODULES=[
+ ["neuron","01","Bau des Neurons","Anklickbares Schema: Dendrit, Soma, Axon, Myelin, Synapse."],
+ ["ruhepotential","02","Ruhepotential","Ionenverteilung, Nernst & Goldman-Rechner, Teilchensimulation."],
+ ["aktionspotential","03","Aktionspotential","Hodgkin-Huxley-Simulation mit Reizen, TTX und Refraktärzeit."],
+ ["leitung","04","Erregungsleitung","Kontinuierlich vs. saltatorisch im animierten Vergleich."],
+ ["synapse","05","Synapse & Summation","Schritt-für-Schritt-Übertragung, EPSP/IPSP-Labor."],
+ ["transmitter","06","Transmitter & Gifte","Wirkorte von Curare, E605, Botox, Kokain & Co."],
+ ["gehirn","07","Das Gehirn","Hirnlappen, Funktionsareale, limbisches System."],
+ ["sinne","08","Sinne & Reflexe","Reizcodierung, Kniesehnenreflex, Fototransduktion."],
+ ["lernen","09","Lernen & Gedächtnis","Gedächtnismodelle, NMDA-Rezeptor, LTP."],
+ ["quiz","10","Quiz","Teste dein Wissen mit Erklärungen zu jeder Antwort."],
+ ["glossar","11","Glossar","Alle Fachbegriffe durchsuchbar."]
+];
+
+const NEURON_PARTS={
+ dendrit:["Dendriten","Verzweigte Fortsätze, die Signale von anderen Neuronen empfangen. Tragen oft dornartige Ausstülpungen (Dendritic Spines), auf denen Synapsen sitzen. Ein Neuron kann über 10 000 synaptische Eingänge haben.",["Eingang","EPSP/IPSP"]],
+ soma:["Zellkörper (Soma, Perikaryon)","Stoffwechselzentrum mit Zellkern, ER (Nissl-Schollen), Golgi-Apparat und Mitochondrien. Hier werden Proteine, Kanäle und Transmitter-Enzyme hergestellt und über das Axon transportiert (axonaler Transport).",["Stoffwechsel"]],
+ zellkern:["Zellkern","Enthält die DNA. Neuronen sind meist postmitotisch – sie teilen sich nicht mehr. Für das Langzeitgedächtnis wird hier Genexpression angestoßen (z. B. über den Transkriptionsfaktor CREB).",["Genexpression"]],
+ axonhuegel:["Axonhügel","Ursprungskegel des Axons mit besonders hoher Dichte spannungsgesteuerter Na⁺-Kanäle – daher die niedrigste Schwelle. Hier werden alle eingehenden Potentiale verrechnet (Integration) und ggf. ein Aktionspotential ausgelöst.",["Integration","Schwelle"]],
+ axon:["Axon (Neurit)","Leitet Aktionspotentiale vom Soma weg, kann über einen Meter lang sein (Ischiasnerv). Im Inneren verlaufen Mikrotubuli für den Transport von Vesikeln und Mitochondrien.",["Ausgang","Weiterleitung"]],
+ myelin:["Myelinscheide","Mehrfach um das Axon gewickelte Membran von Schwann-Zellen (PNS) bzw. Oligodendrozyten (ZNS). Lipidreich, wirkt als elektrischer Isolator: erhöht den Membranwiderstand, senkt die Kapazität → saltatorische Erregungsleitung.",["Isolation","bis 120 m/s"]],
+ schwann:["Schwann-Zelle","Gliazelle des peripheren Nervensystems. Eine Schwann-Zelle umhüllt genau einen Axonabschnitt (Internodium, ca. 1–2 mm). Unterstützt auch die Regeneration verletzter peripherer Nerven.",["Gliazelle","PNS"]],
+ ranvier:["Ranvier-Schnürringe","Etwa 1 µm breite, nicht myelinisierte Lücken zwischen zwei Internodien. Hier sitzen dicht gepackt Na⁺-Kanäle – nur hier entstehen Aktionspotentiale, die Erregung „springt“ von Schnürring zu Schnürring.",["saltatorisch"]],
+ endknoepfchen:["Endknöpfchen (Synapsenendknöpfchen)","Präsynaptische Endigungen mit Vesikeln voller Neurotransmitter. Ein ankommendes AP öffnet Ca²⁺-Kanäle, Ca²⁺ löst die Exocytose aus: Umwandlung des elektrischen in ein chemisches Signal.",["Synapse","Exocytose"]]
+};
+
+const TRANSMITTERS=[
+ ["Acetylcholin","Cholinester","erregend (nikotinerg) / modulierend (muskarinerg)","Motorische Endplatte, vegetatives NS, Gedächtnis (Alzheimer: Mangel)"],
+ ["Glutamat","Aminosäure","erregend","Häufigster erregender Transmitter im ZNS; AMPA-, NMDA-Rezeptoren; Lernen"],
+ ["GABA","Aminosäure","hemmend","Häufigster hemmender Transmitter im Gehirn; Cl⁻-Kanäle (GABA-A)"],
+ ["Glycin","Aminosäure","hemmend","Hemmende Interneurone im Rückenmark und Hirnstamm"],
+ ["Dopamin","Katecholamin","modulierend","Belohnungssystem, Motorik (Parkinson: Mangel in der Substantia nigra)"],
+ ["Noradrenalin","Katecholamin","modulierend","Sympathikus, Aufmerksamkeit, Stressreaktion"],
+ ["Serotonin","Indolamin","modulierend","Stimmung, Schlaf, Appetit; Ziel vieler Antidepressiva"],
+ ["Endorphine","Neuropeptid","hemmend (Schmerz)","Körpereigene Opioide, Schmerzhemmung, „Runner's High“"]
+];
+
+const TOXINS=[
+ {n:"Tetrodotoxin (TTX)",src:"Kugelfisch",site:"nachannel",ort:"prä",eff:"Blockiert spannungsgesteuerte Na⁺-Kanäle von außen. Keine Aktionspotentiale mehr → schlaffe Lähmung, Atemstillstand.",lahm:"schlaff"},
+ {n:"ω-Conotoxin",src:"Kegelschnecke",site:"cachannel",ort:"prä",eff:"Blockiert präsynaptische Ca²⁺-Kanäle. Ohne Ca²⁺-Einstrom keine Exocytose → schlaffe Lähmung.",lahm:"schlaff"},
+ {n:"Botulinumtoxin",src:"Clostridium botulinum",site:"vesikel",ort:"prä",eff:"Spaltet SNARE-Proteine, die Vesikel mit der Membran verschmelzen lassen. Keine ACh-Freisetzung → schlaffe Lähmung. Medizinisch/kosmetisch („Botox“) in winzigen Dosen genutzt.",lahm:"schlaff"},
+ {n:"α-Latrotoxin",src:"Schwarze Witwe",site:"vesikel",ort:"prä",eff:"Bildet Poren und löst massive, unkontrollierte Ausschüttung aller Vesikel aus → Krämpfe; danach Erschöpfung der Speicher.",lahm:"spastisch"},
+ {n:"Tetanustoxin",src:"Clostridium tetani",site:"vesikel",ort:"prä",eff:"Verhindert die Freisetzung der hemmenden Transmitter Glycin und GABA im Rückenmark. Motoneurone werden enthemmt → spastische Lähmung (Wundstarrkrampf).",lahm:"spastisch"},
+ {n:"Curare",src:"Pfeilgift (Pflanzen)",site:"rezeptor",ort:"post",eff:"Kompetitiver Antagonist am nikotinischen ACh-Rezeptor: besetzt ihn, ohne ihn zu öffnen → kein Endplattenpotential → schlaffe Lähmung. Gegenmittel: AChE-Hemmer erhöhen die ACh-Konzentration.",lahm:"schlaff"},
+ {n:"Nikotin",src:"Tabak",site:"rezeptor",ort:"post",eff:"Agonist am nikotinischen ACh-Rezeptor. Wird nicht durch AChE abgebaut → in hohen Dosen Dauerdepolarisation, die Kanäle inaktivieren (Depolarisationsblock).",lahm:"—"},
+ {n:"Atropin",src:"Tollkirsche",site:"rezeptor",ort:"post",eff:"Antagonist am muskarinischen ACh-Rezeptor (Parasympathikus): Pupillenerweiterung, Herzrasen, trockener Mund. Gegengift bei Organophosphat-Vergiftung.",lahm:"—"},
+ {n:"E 605 (Parathion)",src:"Insektizid (verboten)",site:"enzym",ort:"spalt",eff:"Hemmt die Acetylcholinesterase irreversibel. ACh wird nicht abgebaut → Dauererregung der Postsynapse → Krämpfe, dann Lähmung.",lahm:"spastisch"},
+ {n:"Sarin",src:"chem. Kampfstoff",site:"enzym",ort:"spalt",eff:"Organophosphat, irreversibler AChE-Hemmer wie E 605, extrem toxisch.",lahm:"spastisch"},
+ {n:"Physostigmin / Neostigmin",src:"Kalabarbohne / Medikament",site:"enzym",ort:"spalt",eff:"Reversible AChE-Hemmer. Therapeutisch bei Myasthenia gravis und als Gegenmittel bei Curare-Wirkung.",lahm:"—"},
+ {n:"Kokain",src:"Kokastrauch",site:"reuptake",ort:"prä",eff:"Blockiert Wiederaufnahme-Transporter für Dopamin, Noradrenalin und Serotonin → Transmitter bleibt länger im Spalt, verstärkte Wirkung im Belohnungssystem → hohes Suchtpotential.",lahm:"—"},
+ {n:"SSRI (z. B. Fluoxetin)",src:"Antidepressivum",site:"reuptake",ort:"prä",eff:"Selektive Serotonin-Wiederaufnahmehemmer: erhöhen die Serotoninkonzentration im Spalt. Wirkung auf die Stimmung setzt erst nach Wochen ein (Anpassung der Rezeptoren).",lahm:"—"},
+ {n:"Benzodiazepine",src:"Beruhigungsmittel",site:"rezeptor",ort:"post",eff:"Binden an eine eigene Stelle am GABA-A-Rezeptor und verstärken die Wirkung von GABA (positiv allosterisch) → mehr Cl⁻-Einstrom, stärkere Hemmung. Angstlösend, sedierend, Abhängigkeitsrisiko.",lahm:"—"},
+ {n:"Strychnin",src:"Brechnuss",site:"rezeptor",ort:"post",eff:"Antagonist am Glycin-Rezeptor. Die Hemmung im Rückenmark fällt weg → Krämpfe (spastische Lähmung).",lahm:"spastisch"}
+];
+
+const BRAIN={
+ frontal:["Frontallappen","Planung, Handlungssteuerung, Persönlichkeit, Impulskontrolle. Enthält den primären motorischen Cortex (vor der Zentralfurche) und das Broca-Areal. Reift als letzter Bereich aus – bis Mitte 20.",["Exekutive Funktionen","Motorik"]],
+ parietal:["Parietallappen","Verarbeitung von Körperempfindungen (somatosensorischer Cortex hinter der Zentralfurche), räumliche Orientierung, Aufmerksamkeit, Rechnen. Schädigungen können zum Neglect führen.",["Somatosensorik","Raum"]],
+ okzipital:["Okzipitallappen (Hinterhauptslappen)","Sehrinde: primärer visueller Cortex (V1) und visuelle Assoziationsfelder. Verarbeitet Form, Farbe, Bewegung.",["Sehen"]],
+ temporal:["Temporallappen (Schläfenlappen)","Hörrinde, Sprachverstehen (Wernicke-Areal), Objekt- und Gesichtserkennung. Auf der Innenseite liegen Hippocampus und Amygdala – zentral für Gedächtnis und Emotionen.",["Hören","Gedächtnis"]],
+ kleinhirn:["Kleinhirn (Cerebellum)","Koordination, Feinabstimmung und Lernen von Bewegungen, Gleichgewicht. Enthält mehr als die Hälfte aller Neuronen des Gehirns. Alkohol beeinträchtigt es früh (Torkeln).",["Koordination","~69 Mrd. Neuronen"]],
+ hirnstamm:["Hirnstamm","Mittelhirn, Brücke (Pons) und verlängertes Mark (Medulla oblongata). Steuert lebenswichtige Funktionen: Atmung, Herzschlag, Blutdruck, Schlucken, Schlaf-Wach-Rhythmus. Durchgangsstation aller Bahnen zum Rückenmark.",["Vitalfunktionen"]],
+ motor:["Primärer motorischer Cortex","Gyrus praecentralis. Jeder Körperteil hat ein Areal – Hände und Mund sind überproportional groß vertreten (motorischer Homunculus). Die Bahnen kreuzen: die linke Hemisphäre steuert die rechte Körperhälfte.",["Homunculus"]],
+ somato:["Primärer somatosensorischer Cortex","Gyrus postcentralis. Empfängt Tast-, Temperatur- und Schmerzinformationen; ebenfalls somatotop gegliedert (sensorischer Homunculus).",["Tastsinn"]],
+ broca:["Broca-Areal","Sprachproduktion und Grammatik. Schädigung → Broca-Aphasie: mühsames, stockendes Sprechen im „Telegrammstil“, Verständnis weitgehend erhalten.",["Sprache: Produktion"]],
+ wernicke:["Wernicke-Areal","Sprachverständnis. Schädigung → Wernicke-Aphasie: flüssige, aber inhaltlich sinnleere Sprache, gestörtes Verständnis.",["Sprache: Verstehen"]],
+ visuell:["Primärer visueller Cortex (V1)","Erste kortikale Station der Sehbahn. Neurone reagieren auf Kanten bestimmter Orientierung (Hubel & Wiesel, Nobelpreis 1981).",["Sehen"]],
+ hoer:["Primärer auditorischer Cortex","Liegt in der Tiefe der Sylvischen Furche (Heschl-Querwindungen). Tonotop organisiert: verschiedene Frequenzen an verschiedenen Orten.",["Hören"]],
+ praefrontal:["Präfrontaler Cortex","Arbeitsgedächtnis, Entscheidungen, soziales Verhalten. Bekanntes Beispiel: Phineas Gage (1848) – nach einer Verletzung veränderte sich seine Persönlichkeit stark.",["Arbeitsgedächtnis"]]
+};
+
+const INNER=[
+ ["Thalamus","Zwischenhirn","„Tor zum Bewusstsein“: Schaltstation für fast alle Sinnesbahnen (außer Riechen) auf dem Weg zum Cortex."],
+ ["Hypothalamus","Zwischenhirn","Steuert Hormonsystem (über die Hypophyse), Körpertemperatur, Hunger, Durst, circadiane Rhythmik."],
+ ["Hippocampus","Limbisches System","Überführt Inhalte ins deklarative Langzeitgedächtnis, räumliche Navigation (Ortszellen)."],
+ ["Amygdala (Mandelkern)","Limbisches System","Emotionale Bewertung, besonders Angst und Furchtkonditionierung."],
+ ["Basalganglien","Großhirn (subkortikal)","Auswahl und Initiierung von Bewegungen, Gewohnheiten. Ausfall der dopaminergen Zufuhr → Parkinson."],
+ ["Corpus callosum (Balken)","Großhirn","~200 Mio. Axone verbinden beide Hemisphären. Durchtrennung → „Split-Brain“-Patienten (Sperry)."],
+ ["Nucleus accumbens","Belohnungssystem","Dopaminerge Belohnung, Motivation – Angriffspunkt fast aller Suchtstoffe."],
+ ["Substantia nigra","Mittelhirn","Dopaminproduzierende Neuronen, die zu den Basalganglien projizieren."]
+];
+
+const QUIZ=[
+ {t:"Neuron",q:"Wo wird ein Aktionspotential normalerweise ausgelöst?",o:["Am Axonhügel","An den Dendriten","Im Zellkern","Am Endknöpfchen"],a:0,e:"Der Axonhügel hat die höchste Dichte an spannungsgesteuerten Na⁺-Kanälen und damit die niedrigste Schwelle."},
+ {t:"Neuron",q:"Welche Zellen bilden im Zentralnervensystem die Myelinscheide?",o:["Schwann-Zellen","Oligodendrozyten","Astrozyten","Mikroglia"],a:1,e:"Im ZNS myelinisieren Oligodendrozyten (mehrere Axone gleichzeitig), im PNS Schwann-Zellen."},
+ {t:"Ruhepotential",q:"Welches Ion bestimmt das Ruhepotential hauptsächlich?",o:["Na⁺","Ca²⁺","K⁺","Cl⁻"],a:2,e:"In Ruhe ist die Membran vor allem für K⁺ durchlässig – das Ruhepotential liegt daher nahe am K⁺-Gleichgewichtspotential."},
+ {t:"Ruhepotential",q:"Was transportiert die Na⁺/K⁺-ATPase pro ATP?",o:["2 Na⁺ rein, 3 K⁺ raus","3 Na⁺ raus, 2 K⁺ rein","1 Na⁺ raus, 1 K⁺ rein","3 K⁺ raus, 2 Na⁺ rein"],a:1,e:"3 Na⁺ nach außen, 2 K⁺ nach innen – die Pumpe ist damit elektrogen (trägt leicht zur Negativität bei)."},
+ {t:"Ruhepotential",q:"Was passiert, wenn die äußere K⁺-Konzentration stark steigt?",o:["Hyperpolarisation","Depolarisation","Keine Änderung","Das Ruhepotential wird positiver als +50 mV"],a:1,e:"Der K⁺-Gradient wird kleiner, E_K wird positiver → die Zelle depolarisiert (gefährlich bei Hyperkaliämie, z. B. fürs Herz)."},
+ {t:"Ruhepotential",q:"Warum bleiben die negativ geladenen Anionen A⁻ in der Zelle?",o:["Sie werden aktiv hineingepumpt","Sie sind zu groß bzw. es gibt keine Kanäle für sie","Sie sind an K⁺ gebunden","Sie werden ständig neu synthetisiert"],a:1,e:"Organische Anionen (v. a. Proteine) können die Membran nicht passieren."},
+ {t:"Aktionspotential",q:"Was bedeutet das Alles-oder-Nichts-Prinzip?",o:["Jeder Reiz löst ein AP aus","Die AP-Höhe hängt von der Reizstärke ab","Überschwellige Reize lösen immer ein gleich großes AP aus","Nur alle Neuronen gleichzeitig feuern"],a:2,e:"Unter der Schwelle: kein AP. Darüber: immer ein vollständiges, gleich hohes AP. Reizstärke wird über die Frequenz codiert."},
+ {t:"Aktionspotential",q:"Wodurch wird die Repolarisation hauptsächlich verursacht?",o:["Na⁺-Einstrom","K⁺-Ausstrom durch spannungsgesteuerte K⁺-Kanäle","Die Na⁺/K⁺-Pumpe","Cl⁻-Ausstrom"],a:1,e:"Verzögert öffnende K⁺-Kanäle lassen K⁺ ausströmen; gleichzeitig inaktivieren die Na⁺-Kanäle. Die Pumpe ist dafür viel zu langsam."},
+ {t:"Aktionspotential",q:"Warum ist während der absoluten Refraktärzeit kein neues AP möglich?",o:["Die Pumpe ist überlastet","Die Na⁺-Kanäle sind inaktiviert","Es ist kein Na⁺ mehr außen","Das Axon ist ermüdet"],a:1,e:"Das Inaktivierungstor ist geschlossen; erst nach Repolarisation werden die Kanäle wieder aktivierbar."},
+ {t:"Aktionspotential",q:"Wie wirkt Tetrodotoxin (TTX)?",o:["Blockiert K⁺-Kanäle","Blockiert spannungsgesteuerte Na⁺-Kanäle","Hemmt die AChE","Blockiert Ca²⁺-Kanäle"],a:1,e:"TTX verstopft die Na⁺-Kanalpore – es entstehen keine Aktionspotentiale mehr. Probiere es in der Simulation aus."},
+ {t:"Leitung",q:"Warum ist die saltatorische Erregungsleitung schneller?",o:["Myelin leitet Strom besser als Cytoplasma","APs entstehen nur an den Schnürringen, dazwischen breitet sich das Signal elektrotonisch schnell aus","Die Na⁺-Kanäle sind schneller","Myelinisierte Axone haben ein höheres Ruhepotential"],a:1,e:"Die zeitaufwendige AP-Neubildung findet nur alle 1–2 mm statt; dazwischen fließen die Ausgleichsströme isoliert und nahezu verlustfrei."},
+ {t:"Leitung",q:"Warum läuft ein AP auf dem Axon nicht zurück?",o:["Das Axon ist eine Einbahnstraße durch Myelin","Die zuvor erregte Stelle ist refraktär","Der Axonhügel blockiert","K⁺-Kanäle lassen es nicht zu"],a:1,e:"Die gerade erregte Stelle befindet sich in der Refraktärzeit und kann nicht erneut erregt werden."},
+ {t:"Leitung",q:"Was passiert bei Multipler Sklerose?",o:["Na⁺-Kanäle mutieren","Myelin im ZNS wird durch Autoimmunreaktion zerstört","Synapsen werden zerstört","Das Kleinhirn schrumpft"],a:1,e:"Demyelinisierung verlangsamt oder blockiert die Erregungsleitung – vielfältige neurologische Ausfälle."},
+ {t:"Synapse",q:"Welches Ion löst die Exocytose der Vesikel aus?",o:["Na⁺","K⁺","Ca²⁺","Cl⁻"],a:2,e:"Das AP öffnet spannungsgesteuerte Ca²⁺-Kanäle; Ca²⁺ triggert die Verschmelzung der Vesikel mit der Membran."},
+ {t:"Synapse",q:"Was macht die Acetylcholinesterase?",o:["Sie synthetisiert ACh","Sie spaltet ACh in Acetat und Cholin","Sie transportiert ACh in Vesikel","Sie öffnet Rezeptoren"],a:1,e:"Schneller Abbau beendet das Signal; Cholin wird in die Präsynapse zurückgeholt und recycelt."},
+ {t:"Synapse",q:"Ein IPSP entsteht typischerweise durch …",o:["Na⁺-Einstrom","Cl⁻-Einstrom oder K⁺-Ausstrom","Ca²⁺-Einstrom","Schließen von K⁺-Kanälen"],a:1,e:"Cl⁻-Einstrom bzw. K⁺-Ausstrom hyperpolarisiert die Membran oder hält sie nahe am Ruhepotential."},
+ {t:"Synapse",q:"Zeitliche Summation bedeutet …",o:["Mehrere Synapsen feuern gleichzeitig","Eine Synapse feuert schnell hintereinander, die PSPs überlagern sich","EPSP und IPSP heben sich auf","Das AP wird länger"],a:1,e:"Räumliche Summation = verschiedene Synapsen gleichzeitig; zeitliche Summation = dieselbe Synapse in rascher Folge."},
+ {t:"Gifte",q:"Curare führt zu …",o:["spastischer Lähmung durch AChE-Hemmung","schlaffer Lähmung durch Blockade der ACh-Rezeptoren","Krämpfen durch Glycin-Blockade","verstärkter ACh-Ausschüttung"],a:1,e:"Curare ist ein kompetitiver Antagonist am nikotinischen Rezeptor."},
+ {t:"Gifte",q:"Welches Gift verhindert die Ausschüttung von Acetylcholin?",o:["Strychnin","Botulinumtoxin","E 605","Kokain"],a:1,e:"Botulinumtoxin spaltet SNARE-Proteine, die für die Vesikelfusion nötig sind."},
+ {t:"Gifte",q:"Was ist ein geeignetes Gegenmittel bei einer Curare-Vergiftung?",o:["Atropin","Ein reversibler AChE-Hemmer (z. B. Neostigmin)","Botox","Strychnin"],a:1,e:"Hemmt man den Abbau, steigt die ACh-Konzentration und verdrängt Curare kompetitiv von den Rezeptoren."},
+ {t:"Gifte",q:"Wie wirkt Kokain an der Synapse?",o:["Agonist am Dopaminrezeptor","Hemmt die Wiederaufnahme von Dopamin","Blockiert Ca²⁺-Kanäle","Fördert den Dopaminabbau"],a:1,e:"Dopamin bleibt länger im Spalt → verstärkte Aktivierung des Belohnungssystems."},
+ {t:"Gehirn",q:"Welche Hirnregion ist zentral für die Bildung neuer deklarativer Erinnerungen?",o:["Kleinhirn","Hippocampus","Hirnstamm","Okzipitallappen"],a:1,e:"Belegt u. a. durch Patient H. M. nach beidseitiger Hippocampus-Entfernung."},
+ {t:"Gehirn",q:"Eine Schädigung des Broca-Areals führt zu …",o:["Störungen des Sprachverständnisses","stockender, mühsamer Sprachproduktion","Blindheit","Gleichgewichtsstörungen"],a:1,e:"Broca = Produktion, Wernicke = Verstehen."},
+ {t:"Gehirn",q:"Welche Struktur koordiniert Bewegungen und Gleichgewicht?",o:["Kleinhirn","Thalamus","Amygdala","Hypothalamus"],a:0,e:"Das Cerebellum vergleicht geplante und ausgeführte Bewegungen und korrigiert sie."},
+ {t:"Sinne",q:"Wie reagiert ein Stäbchen auf Licht?",o:["Es depolarisiert","Es hyperpolarisiert","Es feuert ein AP","Es schüttet mehr Glutamat aus"],a:1,e:"Licht senkt cGMP → Na⁺-Kanäle schließen → Hyperpolarisation, weniger Glutamat."},
+ {t:"Sinne",q:"Wie wird die Reizstärke im Axon codiert?",o:["Über die Höhe der APs","Über die Frequenz der APs","Über die Dauer eines APs","Gar nicht"],a:1,e:"APs sind immer gleich groß (Alles-oder-Nichts) – stärkere Reize erzeugen höhere Frequenzen."},
+ {t:"Sinne",q:"Der Kniesehnenreflex ist …",o:["ein polysynaptischer Fremdreflex","ein monosynaptischer Eigenreflex","ein bedingter Reflex","vom Großhirn gesteuert"],a:1,e:"Rezeptor (Muskelspindel) und Effektor liegen im selben Muskel, nur eine Synapse im Rückenmark."},
+ {t:"Lernen",q:"Warum gilt der NMDA-Rezeptor als Koinzidenzdetektor?",o:["Er öffnet nur bei gleichzeitiger Glutamatbindung und Depolarisation","Er zählt die APs","Er misst die Zeit zwischen zwei Synapsen","Er bindet zwei Transmitter gleichzeitig"],a:0,e:"Glutamat allein reicht nicht – erst die Depolarisation entfernt den Mg²⁺-Block."},
+ {t:"Lernen",q:"Welches Ion ist der entscheidende Auslöser für LTP?",o:["Na⁺","Ca²⁺","Mg²⁺","Cl⁻"],a:1,e:"Ca²⁺-Einstrom durch NMDA-Kanäle aktiviert Kinasen und führt zum Einbau weiterer AMPA-Rezeptoren."},
+ {t:"Lernen",q:"Wie groß ist die Kapazität des Kurzzeitgedächtnisses (klassisch nach Miller)?",o:["etwa 3 Einheiten","etwa 7 ± 2 Einheiten","etwa 50 Einheiten","unbegrenzt"],a:1,e:"George Miller (1956): „The magical number seven, plus or minus two“ – heute eher auf ~4 Chunks geschätzt."}
+];
+
+const GLOSSARY=[
+ ["Aktionspotential","Erregung","Kurze, stereotype Umkehr des Membranpotentials (~1 ms), ausgelöst bei Überschreiten der Schwelle."],
+ ["Alles-oder-Nichts-Prinzip","Erregung","Überschwellige Reize lösen stets ein vollständiges AP gleicher Amplitude aus, unterschwellige keines."],
+ ["AMPA-Rezeptor","Synapse","Ionotroper Glutamatrezeptor, vermittelt schnelle EPSPs; Einbau weiterer AMPA-Rezeptoren bei LTP."],
+ ["Acetylcholinesterase (AChE)","Synapse","Enzym im synaptischen Spalt, das ACh in Acetat und Cholin spaltet."],
+ ["Agonist","Pharmakologie","Stoff, der an einen Rezeptor bindet und ihn wie der natürliche Ligand aktiviert."],
+ ["Antagonist","Pharmakologie","Stoff, der an einen Rezeptor bindet, ihn aber nicht aktiviert und den Liganden verdrängt."],
+ ["Axon","Bau","Langer Fortsatz eines Neurons, der Aktionspotentiale zu den Synapsen leitet."],
+ ["Axonhügel","Bau","Ursprung des Axons; Ort der Integration und AP-Auslösung."],
+ ["cGMP","Sinne","Zyklisches Guanosinmonophosphat; hält im Dunkeln die Na⁺-Kanäle der Fotorezeptoren offen."],
+ ["Dendrit","Bau","Verzweigter Fortsatz, der synaptische Eingänge empfängt."],
+ ["Depolarisation","Erregung","Verringerung der Membranspannung (Inneres wird weniger negativ)."],
+ ["Elektrotonische Leitung","Erregung","Passive Ausbreitung von Spannungsänderungen mit Abschwächung über die Entfernung."],
+ ["EPSP","Synapse","Erregendes postsynaptisches Potential: Depolarisation der Postsynapse."],
+ ["Exocytose","Synapse","Verschmelzung von Vesikeln mit der Membran und Freisetzung ihres Inhalts."],
+ ["Fließgleichgewicht","Ruhepotential","Dynamisches Gleichgewicht, bei dem passive Leckströme durch aktive Pumpen ausgeglichen werden."],
+ ["Gleichgewichtspotential","Ruhepotential","Spannung, bei der sich elektrischer und chemischer Gradient für ein Ion aufheben (Nernst)."],
+ ["Goldman-Gleichung","Ruhepotential","Berechnet das Membranpotential aus mehreren Ionen, gewichtet nach Permeabilität."],
+ ["Habituation","Lernen","Abnahme der Reaktion auf einen wiederholten, bedeutungslosen Reiz."],
+ ["Hebb'sche Regel","Lernen","Gleichzeitig aktive Neuronen verstärken ihre Verbindung."],
+ ["Hippocampus","Gehirn","Struktur im Temporallappen, wichtig für Gedächtniskonsolidierung und räumliche Orientierung."],
+ ["Hyperpolarisation","Erregung","Membranpotential wird negativer als das Ruhepotential."],
+ ["Inaktivierung","Erregung","Verschluss der Na⁺-Kanäle durch das h-Tor trotz anhaltender Depolarisation."],
+ ["Interneuron","Bau","Neuron, das innerhalb des ZNS zwischen anderen Neuronen vermittelt."],
+ ["IPSP","Synapse","Inhibitorisches postsynaptisches Potential: Hyperpolarisation bzw. Stabilisierung."],
+ ["Laterale Hemmung","Sinne","Benachbarte Neuronen hemmen sich gegenseitig → Kontrastverstärkung."],
+ ["LTP","Lernen","Langzeitpotenzierung: anhaltende Verstärkung einer Synapse nach intensiver Aktivität."],
+ ["Motorische Endplatte","Synapse","Synapse zwischen Motoneuron und Muskelfaser; Transmitter Acetylcholin."],
+ ["Muskelspindel","Sinne","Dehnungsrezeptor im Skelettmuskel; Rezeptor des Kniesehnenreflexes."],
+ ["Myelinscheide","Bau","Isolierende Lipidhülle um Axone, gebildet von Schwann-Zellen bzw. Oligodendrozyten."],
+ ["Nernst-Gleichung","Ruhepotential","E = (RT/zF)·ln(c_a/c_i); berechnet das Gleichgewichtspotential eines Ions."],
+ ["NMDA-Rezeptor","Lernen","Glutamatrezeptor mit Mg²⁺-Block; öffnet nur bei gleichzeitiger Depolarisation, lässt Ca²⁺ ein."],
+ ["Oligodendrozyt","Bau","Gliazelle des ZNS, myelinisiert mehrere Axone."],
+ ["Plastizität","Lernen","Fähigkeit des Nervensystems, Synapsen und Netzwerke durch Erfahrung zu verändern."],
+ ["Ranvier-Schnürring","Bau","Myelinfreie Lücke mit vielen Na⁺-Kanälen; Ort der AP-Neubildung bei saltatorischer Leitung."],
+ ["Refraktärzeit","Erregung","Zeitspanne nach einem AP, in der (absolut) kein oder (relativ) nur erschwert ein neues AP möglich ist."],
+ ["Rezeptorpotential","Sinne","Abgestufte Membranpotentialänderung einer Sinneszelle, proportional zur Reizstärke."],
+ ["Rhodopsin","Sinne","Sehfarbstoff der Stäbchen aus Opsin und 11-cis-Retinal."],
+ ["Ruhepotential","Ruhepotential","Membranspannung einer unerregten Zelle, ca. −70 mV."],
+ ["Saltatorische Erregungsleitung","Erregung","Sprunghafte Leitung von Schnürring zu Schnürring an myelinisierten Axonen."],
+ ["Schwellenwert","Erregung","Membranpotential (~−55 mV), ab dem ein AP ausgelöst wird."],
+ ["Schwann-Zelle","Bau","Gliazelle des PNS, myelinisiert einen Axonabschnitt."],
+ ["Second Messenger","Synapse","Intrazellulärer Botenstoff (z. B. cAMP, cGMP, Ca²⁺), der Signale verstärkt und weiterleitet."],
+ ["Sensitisierung","Lernen","Verstärkte Reaktion auf Reize nach einem starken oder schädlichen Reiz."],
+ ["Soma","Bau","Zellkörper des Neurons mit Zellkern."],
+ ["Summation","Synapse","Verrechnung mehrerer PSPs – räumlich (verschiedene Synapsen) oder zeitlich (schnelle Folge)."],
+ ["Synapse","Synapse","Kontaktstelle zur Signalübertragung zwischen Neuronen oder Neuron und Effektor."],
+ ["Synaptischer Spalt","Synapse","~20 nm breiter Raum zwischen Prä- und Postsynapse."],
+ ["Transduktion","Sinne","Umwandlung eines Reizes in ein elektrisches Signal in der Sinneszelle."],
+ ["Vesikel","Synapse","Membranbläschen in der Präsynapse, mit Neurotransmitter gefüllt."],
+ ["Wiederaufnahme","Synapse","Rücktransport von Transmittern (z. B. Dopamin, Serotonin) in die Präsynapse über Transporter."]
+];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const fmt=(x,d=1)=>(x>=0?"+":"−")+Math.abs(x).toFixed(d);
+function fit(c){if(!c.dataset.h)c.dataset.h=c.getAttribute('height');const H=+c.dataset.h,w=c.getBoundingClientRect().width||600,dpr=window.devicePixelRatio||1;
+  c.style.height=H+'px';if(c.width!==Math.round(w*dpr)||c.height!==Math.round(H*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(H*dpr)}
+  const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{ctx,w,h:H}}
+const C={ink:'#1b2220',ink2:'#4a5551',line:'#ddd6c7',teal:'#0f766e',coral:'#d9482b',amber:'#c98800',violet:'#6d4bc4',green:'#2f8f4e',blue:'#2b72b9'};
+
+/* ---------------- Routing & Fortschritt ---------------- */
+let seen=new Set(store.get('neuro_seen',[]));let cur='start';
+const tiles=$('#tiles');MODULES.forEach(([id,n,t,d])=>{tiles.insertAdjacentHTML('beforeend',`<a class="tile" href="#${id}" data-t="${id}"><div class="n">${n}</div><h3>${t}</h3><p>${d}</p></a>`)});
+function markSeen(){$$('nav.side a').forEach(a=>a.classList.toggle('seen',seen.has(a.dataset.v)));$$('.tile').forEach(t=>t.classList.toggle('seen',seen.has(t.dataset.t)));
+  $('#progBar').style.width=(MODULES.filter(m=>seen.has(m[0])).length/MODULES.length*100)+'%'}
+const onShow={};
+function route(){let v=(location.hash||'#start').slice(1);if(!$('#v-'+v))v='start';cur=v;
+  $$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));$$('nav.side a').forEach(a=>a.classList.toggle('active',a.dataset.v===v));
+  if(v!=='start'){seen.add(v);store.set('neuro_seen',[...seen])}markSeen();$('#side').classList.remove('open');window.scrollTo(0,0);
+  requestAnimationFrame(()=>onShow[v]&&onShow[v]())}
+window.addEventListener('hashchange',route);$('#menuBtn').onclick=()=>$('#side').classList.toggle('open');
+window.addEventListener('resize',()=>onShow[cur]&&onShow[cur]());
+const ticks={};let last=performance.now();
+function loop(now){const dt=Math.min(50,now-last);last=now;ticks[cur]&&ticks[cur](dt,now);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+
+/* ---------------- 01 Neuron ---------------- */
+$$('#neuronSvg .part').forEach(g=>g.addEventListener('click',()=>{$$('#neuronSvg .part').forEach(x=>x.classList.remove('sel'));g.classList.add('sel');
+  const [t,d,tags]=NEURON_PARTS[g.dataset.part];$('#neuronInfo').innerHTML=`<h3>${t}</h3><div>${tags.map(x=>`<span class="pill green">${x}</span>`).join('')}</div><p style="margin-top:8px">${d}</p>`}));
+
+/* ---------------- 02 Ruhepotential ---------------- */
+const ions={Ki:140,Nai:15,Nao:145,Cli:10,Clo:110};
+function ghk(){const PK=+$('#pK').value,PNa=+$('#pNa').value,PCl=+$('#pCl').value,Ko=+$('#kOut').value;
+  $('#oPK').textContent=PK.toFixed(2);$('#oPNa').textContent=PNa.toFixed(3);$('#oPCl').textContent=PCl.toFixed(2);$('#oKo').textContent=Ko;
+  const V=61.5*Math.log10((PK*Ko+PNa*ions.Nao+PCl*ions.Cli)/(PK*ions.Ki+PNa*ions.Nai+PCl*ions.Clo));
+  const EK=61.5*Math.log10(Ko/ions.Ki),ENa=61.5*Math.log10(ions.Nao/ions.Nai),ECl=-61.5*Math.log10(ions.Clo/ions.Cli);
+  $('#eK').textContent=fmt(EK,0)+' mV';$('#eNa').textContent=fmt(ENa,0)+' mV';$('#eCl').textContent=fmt(ECl,0)+' mV';
+  $('#gOut').textContent=fmt(V,1)+' mV';$('#gDot').setAttribute('cx',Math.max(10,Math.min(290,10+(V+100)/150*280)));
+  $('#gDot').setAttribute('fill',V>-20?C.coral:C.teal);
+  let ex;if(V>0)ex='Die Na⁺-Permeabilität dominiert: Das Potential nähert sich E<sub>Na</sub> – genau das passiert an der Spitze eines Aktionspotentials.';
+  else if(Ko>12)ex='Erhöhtes äußeres K⁺ verkleinert den K⁺-Gradienten: Die Zelle depolarisiert dauerhaft. Na⁺-Kanäle inaktivieren – Erregbarkeit sinkt (z. B. Herzrhythmusstörungen).';
+  else ex=`Das Potential liegt nahe E<sub>K</sub> (${fmt(EK,0)} mV), weil K⁺ am durchlässigsten ist. Der geringe Na⁺-Leckstrom zieht es etwas ins Positive.`;
+  $('#gExplain').innerHTML=ex}
+['pK','pNa','pCl','kOut'].forEach(id=>$('#'+id).addEventListener('input',ghk));
+$$('[data-preset]').forEach(b=>b.onclick=()=>{const p={rest:[1,.04,.45,5],ap:[.05,1,.02,5],hyperK:[1,.04,.45,15]}[b.dataset.preset];
+  ['pK','pNa','pCl','kOut'].forEach((id,i)=>$('#'+id).value=p[i]);ghk()});ghk();
+
+// Teilchensimulation
+const IS={parts:[],anions:[],init:false};
+const chK=[.12,.32,.56,.76],chNa=[.22,.66],chP=[.44,.9];
+function ionInit(){IS.parts=[];const add=(type,side,n)=>{for(let i=0;i<n;i++)IS.parts.push({type,side,x:Math.random()*.9+.02,y:Math.random(),f:0})};
+  add('K','i',60);add('K','o',3);add('Na','i',8);add('Na','o',60);
+  IS.anions=Array.from({length:12},()=>({x:Math.random()*.9+.03,y:Math.random()*.8+.15}));IS.init=true}
+function cnt(t,s){let n=0;for(const p of IS.parts)if(p.type===t&&p.side===s)n++;return n}
+function move(type,from,chx){const c=IS.parts.filter(p=>p.type===type&&p.side===from);if(!c.length)return;const p=c[Math.random()*c.length|0];
+  p.side=from==='i'?'o':'i';p.x=chx+(Math.random()-.5)*.02;p.y=p.side==='o'?.95:.05;p.f=30;p.cx=chx}
+function stoch(rate,fn){let r=rate;while(r>0){if(Math.random()<Math.min(r,1))fn();r-=1}}
+ticks.ruhepotential=()=>{const c=$('#ionCanvas');const {ctx,w,h}=fit(c);if(!IS.init)ionInit();
+  const Ki=cnt('K','i'),Ko=cnt('K','o'),Nai=cnt('Na','i'),Nao=cnt('Na','o');const a=26.7;
+  const V=a*Math.log((Ko+.05*Nao+.01)/(Ki+.05*Nai+.01));const eo=Math.exp(V/(2*a)),ei=Math.exp(-V/(2*a));
+  stoch(.004*Ki*eo,()=>move('K','i',chK[Math.random()*4|0]));stoch(.004*Ko*ei,()=>move('K','o',chK[Math.random()*4|0]));
+  stoch(.0002*Nao*ei,()=>move('Na','o',chNa[Math.random()*2|0]));stoch(.0002*Nai*eo,()=>move('Na','i',chNa[Math.random()*2|0]));
+  if($('#pumpOn').checked)stoch(.02*Nai/(Nai+10),()=>{const px=chP[Math.random()*2|0];for(let k=0;k<3;k++)move('Na','i',px);for(let k=0;k<2;k++)move('K','o',px)});
+  const top=[8,112],bot=[148,252],my=(p)=>p.side==='o'?top[0]+p.y*(top[1]-top[0]):bot[0]+p.y*(bot[1]-bot[0]);
+  ctx.fillStyle='#eef6f5';ctx.fillRect(0,0,w,120);ctx.fillStyle='#fbf4ea';ctx.fillRect(0,140,w,120);
+  ctx.fillStyle='#e8d9b5';ctx.fillRect(0,120,w,20);ctx.fillStyle='#d9c69a';for(let x=4;x<w;x+=9){ctx.beginPath();ctx.arc(x,123,3,0,7);ctx.arc(x,137,3,0,7);ctx.fill()}
+  const drawCh=(xs,col,lab,wd)=>xs.forEach(x=>{ctx.fillStyle=col;ctx.fillRect(x*w-wd/2,116,wd,28);ctx.fillStyle='#fff';ctx.fillRect(x*w-2,116,4,28);ctx.fillStyle=C.ink2;ctx.font='10px IBM Plex Mono';ctx.fillText(lab,x*w-wd/2,112)});
+  drawCh(chK,C.violet,'K⁺-Leck',14);drawCh(chNa,C.amber,'Na⁺',14);
+  chP.forEach(x=>{ctx.fillStyle=$('#pumpOn').checked?C.teal:'#aaa';ctx.beginPath();ctx.ellipse(x*w,130,16,16,0,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 9px IBM Plex Sans';ctx.fillText('ATP',x*w-9,133)});
+  for(const p of IS.parts){p.x=Math.min(.99,Math.max(.01,p.x+(Math.random()-.5)*.006));p.y=Math.min(1,Math.max(0,p.y+(Math.random()-.5)*.03));
+    const x=p.x*w,y=my(p);if(p.f>0){p.f--;ctx.strokeStyle=p.type==='K'?'rgba(109,75,196,.5)':'rgba(201,136,0,.6)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(p.cx*w,130);ctx.lineTo(x,y);ctx.stroke()}
+    ctx.fillStyle=p.type==='K'?C.violet:'#e0a400';ctx.beginPath();ctx.arc(x,y,p.f>0?5:3.6,0,7);ctx.fill()}
+  for(const an of IS.anions){an.x=Math.min(.97,Math.max(.03,an.x+(Math.random()-.5)*.002));ctx.fillStyle='rgba(43,114,185,.35)';ctx.beginPath();ctx.arc(an.x*w,bot[0]+an.y*100,9,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='9px IBM Plex Sans';ctx.fillText('A⁻',an.x*w-6,bot[0]+an.y*100+3)}
+  ctx.fillStyle=C.ink;ctx.font='600 12px IBM Plex Sans';ctx.fillText('AUSSEN',8,20);ctx.fillText('INNEN',8,252);
+  ctx.font='600 20px Fraunces';ctx.textAlign='right';ctx.fillStyle=V<-40?C.teal:C.coral;ctx.fillText(fmt(V,0)+' mV',w-10,252);ctx.textAlign='left';
+  $('#ionStat').textContent=`innen K⁺ ${Ki} · Na⁺ ${Nai}  |  außen K⁺ ${Ko} · Na⁺ ${Nao}`};
+onShow.ruhepotential=()=>{};
+$('#pumpOn').addEventListener('change',()=>{});
+
+/* ---------------- 03 Aktionspotential (Hodgkin-Huxley) ---------------- */
+function vtrap(x,y){return Math.abs(x/y)<1e-6?y*(1-x/y/2):x/(Math.exp(x/y)-1)}
+function hhRun(p){const dt=.01,T=50;let V=-65;const r=V=>({am:.1*vtrap(-(V+40),10),bm:4*Math.exp(-(V+65)/18),ah:.07*Math.exp(-(V+65)/20),bh:1/(1+Math.exp(-(V+35)/10)),an:.01*vtrap(-(V+55),10),bn:.125*Math.exp(-(V+65)/80)});
+  let k=r(V),m=k.am/(k.am+k.bm),h=k.ah/(k.ah+k.bh),n=k.an/(k.an+k.bn);const gNa=p.ttx?0:120,gK=p.tea?0:36,gL=.3,ENa=50,EK=-77,EL=-54.387;
+  const out={t:[],V:[],gna:[],gk:[],I:[]};
+  const I=t=>p.dauer?(t>=5&&t<45?p.s1:0):((t>=5&&t<5+p.dur?p.s1:0)+(p.s2>0&&t>=5+p.del&&t<5+p.del+p.dur?p.s2:0));
+  for(let i=0;i<=T/dt;i++){const t=i*dt;k=r(V);m+=dt*(k.am*(1-m)-k.bm*m);h+=dt*(k.ah*(1-h)-k.bh*h);n+=dt*(k.an*(1-n)-k.bn*n);
+    const gn=gNa*m*m*m*h,gk=gK*n*n*n*n,it=I(t);V+=dt*(it-gn*(V-ENa)-gk*(V-EK)-gL*(V-EL));
+    if(i%5===0){out.t.push(t);out.V.push(V);out.gna.push(gn);out.gk.push(gk);out.I.push(it)}}return out}
+function apDraw(){const p={s1:+$('#s1').value,s2:+$('#s2').value,dur:+$('#dur').value,del:+$('#del').value,ttx:$('#ttx').checked,tea:$('#tea').checked,dauer:$('#dauer').checked};
+  $('#oS1').textContent=p.s1+' µA/cm²';$('#oS2').textContent=p.s2+' µA/cm²';$('#oDur').textContent=p.dur+' ms';$('#oDel').textContent=p.del+' ms';
+  const d=hhRun(p),{ctx,w,h}=fit($('#apCanvas'));const L=46,R=46,T=14,B=72,ph=h-T-B;
+  const X=t=>L+t/50*(w-L-R),Y=v=>T+(60-v)/150*ph,Yg=g=>T+ph-g/40*ph,Ys=i=>h-26-i/40*36;
+  ctx.clearRect(0,0,w,h);ctx.font='10px IBM Plex Mono';ctx.fillStyle=C.ink2;ctx.strokeStyle='#ebe5d8';ctx.lineWidth=1;
+  for(let v=-80;v<=60;v+=20){ctx.beginPath();ctx.moveTo(L,Y(v));ctx.lineTo(w-R,Y(v));ctx.stroke();ctx.fillText(v,L-30,Y(v)+3)}
+  for(let t=0;t<=50;t+=10){ctx.fillText(t+' ms',X(t)-12,h-6)}
+  ctx.save();ctx.translate(12,T+ph/2);ctx.rotate(-Math.PI/2);ctx.fillText('mV',0,0);ctx.restore();
+  ctx.setLineDash([5,4]);ctx.strokeStyle=C.coral;ctx.beginPath();ctx.moveTo(L,Y(-55));ctx.lineTo(w-R,Y(-55));ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=C.coral;ctx.fillText('Schwelle ≈ −55',w-R-92,Y(-55)-4);
+  ctx.strokeStyle='#bbb';ctx.beginPath();ctx.moveTo(L,Y(0));ctx.lineTo(w-R,Y(0));ctx.stroke();
+  const line=(arr,f,col,lw)=>{ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.beginPath();arr.forEach((v,i)=>{const x=X(d.t[i]),y=f(v);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()};
+  if($('#cond').checked){line(d.gna,Yg,C.amber,2);line(d.gk,Yg,C.violet,2);ctx.fillStyle=C.ink2;for(let g=0;g<=40;g+=10)ctx.fillText(g,w-R+6,Yg(g)+3);ctx.save();ctx.translate(w-8,T+ph/2);ctx.rotate(Math.PI/2);ctx.fillText('mS/cm²',-20,0);ctx.restore()}
+  line(d.V,Y,C.ink,2.6);ctx.fillStyle='#f7efe6';ctx.fillRect(L,h-62,w-L-R,40);line(d.I,Ys,C.coral,2);ctx.fillStyle=C.coral;ctx.fillText('Reizstrom',L+4,h-50);
+  let n=0;for(let i=1;i<d.V.length;i++)if(d.V[i-1]<0&&d.V[i]>=0)n++;
+  let msg;if(p.ttx)msg='<b>TTX</b>: Ohne Na⁺-Einstrom keine Depolarisationslawine – nur passive, abklingende Antwort. Kein AP möglich.';
+  else if(p.dauer)msg=`<b>Dauerreiz</b>: ${n} APs in 40 ms (≈ ${Math.round(n/0.04)} Hz). Stärkerer Reiz → höhere Frequenz, aber gleiche Amplitude.`;
+  else if(n===0)msg='Kein AP: Der Reiz bleibt <b>unterschwellig</b>. Es entsteht nur ein lokales, elektrotonisch abklingendes Potential.';
+  else if(p.s2>0&&n===1)msg=`Nur <b>ein</b> AP: Der zweite Reiz fällt in die ${p.del<6?'absolute':'relative'} Refraktärzeit. Erhöhe Abstand oder Stärke.`;
+  else if(p.tea)msg='<b>TEA</b>: Ohne K⁺-Kanäle erfolgt die Repolarisation stark verzögert – das AP wird extrem verlängert.';
+  else msg=`${n} Aktionspotential${n>1?'e':''} ausgelöst. Beachte: g<sub>Na</sub> steigt schnell und fällt wieder (Inaktivierung), g<sub>K</sub> folgt verzögert.`;
+  $('#apMsg').innerHTML=msg}
+['s1','s2','dur','del'].forEach(id=>$('#'+id).addEventListener('input',apDraw));['ttx','tea','cond','dauer'].forEach(id=>$('#'+id).addEventListener('change',apDraw));
+$$('[data-ap]').forEach(b=>b.onclick=()=>{const s={sub:[3,1,0,12],supra:[10,1,0,12],refr:[10,1,12,6]}[b.dataset.ap];['s1','dur','s2','del'].forEach((id,i)=>$('#'+id).value=s[i]);$('#ttx').checked=$('#tea').checked=$('#dauer').checked=false;apDraw()});
+onShow.aktionspotential=apDraw;
+(function chan(){const g=$('#chanStates');const st=[['geschlossen',0,1],['offen',1,1],['inaktiviert',1,0]];
+  g.innerHTML=st.map(([lab,mOpen,hOpen],i)=>{const x=55+i*110;return `<g transform="translate(${x} 0)"><rect x="-24" y="40" width="16" height="60" rx="4" fill="#c98800"/><rect x="8" y="40" width="16" height="60" rx="4" fill="#c98800"/>
+  ${mOpen?`<rect x="-24" y="14" width="10" height="26" rx="3" fill="#2f8f4e" transform="rotate(-25 -19 40)"/>`:`<rect x="-8" y="30" width="16" height="10" rx="3" fill="#2f8f4e"/>`}
+  ${hOpen?`<circle cx="22" cy="114" r="7" fill="#d9482b"/><line x1="16" y1="100" x2="22" y2="108" stroke="#d9482b" stroke-width="3"/>`:`<circle cx="0" cy="102" r="8" fill="#d9482b"/><line x1="16" y1="100" x2="6" y2="102" stroke="#d9482b" stroke-width="3"/>`}
+  ${mOpen&&hOpen?'<path d="M0 20 L0 112" stroke="#e0a400" stroke-width="3" stroke-dasharray="3 4"/>':''}
+  <text x="0" y="135" text-anchor="middle" font-size="11" font-family="IBM Plex Mono" fill="#1b2220">${lab}</text></g>`}).join('')+
+  '<text x="270" y="25" font-size="9" fill="#2f8f4e">m-Tor</text><text x="275" y="125" font-size="9" fill="#d9482b">h-Tor</text>'})();
+
+/* ---------------- 04 Erregungsleitung ---------------- */
+const CD={t:-1,run:false};
+$('#condGo').onclick=()=>{CD.t=0;CD.run=true};
+ticks.leitung=(dt)=>{const {ctx,w,h}=fit($('#condCanvas'));const x0=50,x1=w-30,Lmm=100,px=mm=>x0+mm/Lmm*(x1-x0);
+  if(CD.run)CD.t+=dt/($('#condSlow').checked?100:25);const t=CD.t,ms=$('#condMS').checked;
+  ctx.clearRect(0,0,w,h);ctx.font='12px IBM Plex Sans';ctx.fillStyle=C.ink;
+  // marklos
+  const y1=80;ctx.fillText('Marklose Faser · kontinuierlich (hier 2 m/s)',x0,30);ctx.fillStyle='#f0c9a8';ctx.fillRect(x0,y1-9,x1-x0,18);
+  if(t>=0){const front=Math.min(Lmm,t*2);for(let mm=0;mm<=front;mm+=.5){const age=(front-mm)/2;let col=null;
+      if(age<1)col=`rgba(217,72,43,${1-age*.3})`;else if(age<4)col=`rgba(109,75,196,${.6-(age-1)*.15})`;if(col){ctx.fillStyle=col;ctx.fillRect(px(mm),y1-9,(x1-x0)/200+1,18)}}
+    if(front<Lmm){ctx.strokeStyle='rgba(217,72,43,.6)';ctx.lineWidth=1.5;for(let k=1;k<=2;k++){ctx.beginPath();ctx.arc(px(front)+k*12,y1,8+k*4,Math.PI*1.1,Math.PI*1.9);ctx.stroke()}}
+    ctx.fillStyle=C.ink2;ctx.font='11px IBM Plex Mono';ctx.fillText(front>=Lmm?`Ende erreicht nach 50,0 ms`:`${(t).toFixed(1)} ms`,x0,y1+32)}
+  // myelinisiert
+  const y2=200;ctx.fillStyle=C.ink;ctx.font='12px IBM Plex Sans';ctx.fillText('Myelinisierte Faser · saltatorisch (hier 20 m/s)'+(ms?' · mit Demyelinisierung':''),x0,150);
+  ctx.fillStyle='#e08c55';ctx.fillRect(x0,y2-4,x1-x0,8);const nodes=[];for(let mm=0;mm<=Lmm;mm+=10)nodes.push(mm);
+  const bad=i=>ms&&(i===4||i===5);let times=[0];for(let i=1;i<nodes.length;i++)times.push(times[i-1]+(bad(i-1)?2.5:.5));
+  for(let i=0;i<nodes.length-1;i++){const a=px(nodes[i])+5,b=px(nodes[i+1])-5;if(bad(i)){ctx.strokeStyle='#bbb';ctx.setLineDash([4,4]);ctx.strokeRect(a,y2-14,b-a,28);ctx.setLineDash([])}else{ctx.fillStyle='#f1df9f';ctx.strokeStyle='#c4a54f';ctx.beginPath();ctx.roundRect(a,y2-14,b-a,28,12);ctx.fill();ctx.stroke()}}
+  nodes.forEach((mm,i)=>{const tt=times[i];let col='#cfc6b4';if(t>=0&&t>=tt){const age=t-tt;col=age<1?C.coral:age<4?C.violet:'#cfc6b4'}ctx.fillStyle=col;ctx.fillRect(px(mm)-4,y2-10,8,20);
+    if(t>=tt&&t<tt+1&&i<nodes.length-1){ctx.strokeStyle='rgba(217,72,43,.55)';ctx.lineWidth=2;ctx.beginPath();const a=px(mm),b=px(nodes[i+1]);ctx.moveTo(a,y2-12);ctx.quadraticCurveTo((a+b)/2,y2-50,b,y2-12);ctx.stroke()}});
+  if(t>=0){const end=times[times.length-1];ctx.fillStyle=C.ink2;ctx.font='11px IBM Plex Mono';ctx.fillText(t>=end?`Ende erreicht nach ${end.toFixed(1).replace('.',',')} ms`:`${t.toFixed(1)} ms`,x0,y2+40)}
+  ctx.font='11px IBM Plex Sans';ctx.fillStyle=C.coral;ctx.fillText('■ erregt (AP)',x0,h-12);ctx.fillStyle=C.violet;ctx.fillText('■ refraktär',x0+100,h-12);ctx.fillStyle=C.ink2;ctx.fillText('Bögen = Ausgleichsströme · Geschwindigkeiten 1:10 (real bis 1:100)',x0+190,h-12);
+  $('#condT').textContent=t>=0?`Simulationszeit: ${t.toFixed(1)} ms`:'';if(t>60)CD.run=false};
+
+/* ---------------- 05 Synapse ---------------- */
+const SY={i:0,auto:null};const NS='http://www.w3.org/2000/svg';
+const mk=(par,tag,attrs)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);par.appendChild(e);return e};
+const vesPos=[[200,120],[255,92],[345,98],[400,128],[300,120],[300,168]];
+const vesEls=vesPos.map(([x,y])=>{const g=mk($('#vesicles'),'g',{});mk(g,'circle',{cx:0,cy:0,r:17,fill:'#f7d2b0',stroke:'#c9733d','stroke-width':2});
+  for(let k=0;k<5;k++)mk(g,'circle',{cx:Math.cos(k*1.3)*8,cy:Math.sin(k*1.3)*8,r:2.6,fill:'#d9482b'});g.style.transform=`translate(${x}px,${y}px)`;g.style.transition='transform 1s, opacity .8s';return g});
+const recX=[230,300,370];recX.forEach(x=>{const g=mk($('#receptors'),'g',{class:'rec'});mk(g,'rect',{x:x-14,y:226,width:12,height:30,rx:3,fill:'#0f766e'});mk(g,'rect',{x:x+2,y:226,width:12,height:30,rx:3,fill:'#0f766e'})});
+const achEls=Array.from({length:12},()=>{const c=mk($('#ach'),'circle',{cx:0,cy:0,r:4});c.style.transition='transform 1.1s ease, opacity .8s';return c});
+const caEls=Array.from({length:8},(_,i)=>{const c=mk($('#caIons'),'circle',{cx:0,cy:0,r:4.5});c.style.transition='transform 1.1s ease, opacity .6s';return c});
+const naEls=Array.from({length:9},()=>{const c=mk($('#naIons'),'circle',{cx:0,cy:0,r:4});c.style.transition='transform 1.2s ease, opacity .6s';return c});
+const SYN_STEPS=[
+ ['Aktionspotential erreicht das Endknöpfchen','Das AP läuft über das Axon in die Präsynapse und depolarisiert die präsynaptische Membran.'],
+ ['Ca²⁺-Kanäle öffnen','Die Depolarisation öffnet spannungsgesteuerte <b style="color:#2f8f4e">Ca²⁺-Kanäle</b> in der präsynaptischen Membran.'],
+ ['Ca²⁺ strömt ein','Ca²⁺ ist außen ~10 000× höher konzentriert und strömt ein. Je mehr APs pro Zeit, desto mehr Ca²⁺ – desto mehr Transmitter (Frequenz → Menge).'],
+ ['Exocytose','Ca²⁺ bindet an Synaptotagmin; SNARE-Proteine verschmelzen die Vesikel mit der Membran. Pro Vesikel werden ca. 5 000–10 000 ACh-Moleküle frei (Quantum).'],
+ ['Diffusion und Bindung','Acetylcholin diffundiert durch den Spalt (&lt; 0,1 ms) und bindet an <b style="color:#0f766e">nikotinische ACh-Rezeptoren</b> – ligandengesteuerte Ionenkanäle.'],
+ ['Na⁺-Einstrom → EPSP','Die Rezeptorkanäle öffnen, <b style="color:#c98800">Na⁺</b> strömt ein → Depolarisation der Postsynapse (EPSP bzw. Endplattenpotential). Ist es überschwellig, entsteht ein Muskel-AP.'],
+ ['Inaktivierung und Recycling','Die <b style="color:#c98800">Acetylcholinesterase</b> spaltet ACh in Acetat und Cholin – das Signal endet. Cholin wird in die Präsynapse zurückgeholt und zu neuem ACh synthetisiert; Vesikel werden per Endocytose recycelt.']];
+$('#synSteps').innerHTML=SYN_STEPS.map((_,i)=>`<button data-s="${i}">${i+1}</button>`).join('');
+const T=(e,x,y,o=1)=>{e.style.transform=`translate(${x}px,${y}px)`;e.style.opacity=o};
+function synSet(i){SY.i=i;$$('#synSteps button').forEach((b,k)=>b.classList.toggle('on',k===i));
+  $('#synInfo').innerHTML=`<div class="hint mono">Schritt ${i+1} / 7</div><h3>${SYN_STEPS[i][0]}</h3><p style="margin:0">${SYN_STEPS[i][1]}</p>`;
+  const band=$('#apBand');band.style.transition='none';band.style.transform='translateY(0)';band.style.opacity=0;
+  if(i===0){requestAnimationFrame(()=>requestAnimationFrame(()=>{band.style.transition='transform 1.2s ease-in, opacity .3s';band.style.opacity=.75;band.style.transform='translateY(48px)'}))}
+  $$('#caCh rect').forEach(r=>r.setAttribute('fill',i>=1&&i<=3?'#55c27a':'#2f8f4e'));$('#caCh').style.filter=i>=1&&i<=3?'drop-shadow(0 0 6px #2f8f4e)':'';
+  caEls.forEach((c,k)=>{const side=k<4?0:1,bx=side?481:119,ox=(k%4-1.5)*9;if(i<2)T(c,bx+ox,218+(k%2)*6);else T(c,bx+ox*1.2+(side?-25:25),165-(k%4)*10,i>=4?.3:1)});
+  vesEls.forEach((v,k)=>{const [x,y]=vesPos[k];if(k===5){if(i>=3){v.style.transform=`translate(${x}px,191px) scale(1.15,.55)`;v.style.opacity=i>=6?.0:.45}else{v.style.transform=`translate(${x}px,${y}px)`;v.style.opacity=1}}
+    else if(k===4&&i>=6){v.style.transform=`translate(${x}px,${y}px)`;v.style.opacity=1}});
+  achEls.forEach((c,k)=>{if(i<3)T(c,300,168,0);else if(i===3)T(c,262+k*7,204+(k%3)*3);else if(i<=5){const r=recX[k%3];T(c,r+(k%2?6:-6),k<6?222:210)}else T(c,[178,308,428][k%3]+(k%2?6:-6),210+(k%4)*2,.25)});
+  naEls.forEach((c,k)=>{const r=recX[k%3];if(i<5)T(c,r,205-(k%3)*6,0);else if(i===5)T(c,r+(k%2?4:-4),290+(k%3)*22);else T(c,r+(k%2?18:-18),320+(k%3)*25,.25)});
+  $$('#receptors rect').forEach(r=>r.setAttribute('fill',i===5?'#14b8a6':'#0f766e'));
+  $('#epspTag').setAttribute('opacity',i===5?1:0);$('#reupt').setAttribute('opacity',i===6?1:0);
+  $('#postMem').style.filter=i===5?'brightness(1.08) saturate(1.5)':'';$('#ache').style.filter=i===6?'drop-shadow(0 0 5px #c98800)':''}
+$$('#synSteps button').forEach(b=>b.onclick=()=>{stopAuto();synSet(+b.dataset.s)});
+$('#synNext').onclick=()=>{stopAuto();synSet((SY.i+1)%7)};$('#synPrev').onclick=()=>{stopAuto();synSet((SY.i+6)%7)};
+function stopAuto(){if(SY.auto){clearInterval(SY.auto);SY.auto=null;$('#synAuto').textContent='▶ Autoplay'}}
+$('#synAuto').onclick=()=>{if(SY.auto)return stopAuto();synSet(0);SY.auto=setInterval(()=>{if(SY.i>=6)return stopAuto();synSet(SY.i+1)},2600);$('#synAuto').textContent='■ Stopp'};
+vesEls.concat(achEls,caEls,naEls).forEach(e=>e.style.transition='none');synSet(0);
+setTimeout(()=>{vesEls.forEach(v=>v.style.transition='transform 1s, opacity .8s');[...achEls,...caEls,...naEls].forEach(e=>e.style.transition='transform 1.1s ease, opacity .7s')},50);
+
+// Summation
+const SM={t:0,ev:[],buf:[],spike:-1e9,last:-1e9,pend:[]};const AMP={A:9,B:7,C:-6},TAU={A:15,B:15,C:20};
+function fire(s,at){SM.ev.push({s,t:at??SM.t})}
+$$('[data-syn]').forEach(b=>b.onclick=()=>fire(b.dataset.syn));
+$$('[data-combo]').forEach(b=>b.onclick=()=>{const c=b.dataset.combo,t=SM.t;const M={temporal:'Zeitliche Summation: Synapse A feuert dreimal in kurzer Folge – die EPSPs überlagern sich.',spatial:'Räumliche Summation: A und B feuern gleichzeitig – ihre EPSPs addieren sich am Axonhügel.',inhib:'Hemmung: A, B und die hemmende Synapse C feuern gleichzeitig – das IPSP verhindert das AP.'};
+  if(c==='temporal'){fire('A',t);fire('A',t+7);fire('A',t+14)}else if(c==='spatial'){fire('A',t);fire('B',t)}else{fire('A',t);fire('B',t);fire('C',t)}$('#sumMsg').textContent=M[c]});
+const alpha=(x,tau)=>x<=0?0:(x/tau)*Math.exp(1-x/tau);
+function vAt(t){let v=0;for(const e of SM.ev)if(e.t>SM.spike)v+=AMP[e.s]*alpha(t-e.t,TAU[e.s]);const ds=t-SM.spike;
+  if(ds>=0&&ds<1)v=-0+100*ds;else if(ds>=1&&ds<2.5)v=100-(ds-1)/1.5*110;else if(ds>=2.5)v+=-10*Math.exp(-(ds-2.5)/20);return v}
+ticks.synapse=(dt)=>{const {ctx,w,h}=fit($('#sumCanvas'));const step=dt/10;const n=Math.max(1,Math.round(step/.25));
+  for(let k=0;k<n;k++){SM.t+=step/n;let v=vAt(SM.t);if(v>=15&&SM.t-SM.spike>12&&SM.t-SM.spike>3){SM.spike=SM.t;v=vAt(SM.t)}SM.buf.push([SM.t,v])}
+  while(SM.buf.length&&SM.buf[0][0]<SM.t-420)SM.buf.shift();SM.ev=SM.ev.filter(e=>SM.t-e.t<200);
+  const L=40,R=10,Tp=12,B=26,Y=v=>Tp+(110-v)/130*(h-Tp-B),X=t=>L+(t-(SM.t-400))/400*(w-L-R);
+  ctx.clearRect(0,0,w,h);ctx.font='10px IBM Plex Mono';ctx.fillStyle=C.ink2;ctx.strokeStyle='#ebe5d8';
+  for(let v=-80;v<=40;v+=20){const yy=Y(v+70);ctx.beginPath();ctx.moveTo(L,yy);ctx.lineTo(w-R,yy);ctx.stroke();ctx.fillText(v,6,yy+3)}
+  ctx.setLineDash([5,4]);ctx.strokeStyle=C.coral;ctx.beginPath();ctx.moveTo(L,Y(15));ctx.lineTo(w-R,Y(15));ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=C.coral;ctx.fillText('Schwelle −55 mV',w-120,Y(15)-5);
+  ctx.strokeStyle=C.ink;ctx.lineWidth=2.2;ctx.beginPath();SM.buf.forEach(([t,v],i)=>{const x=X(t),y=Y(Math.min(v,105));i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+  for(const e of SM.ev){const x=X(e.t);if(x<L)continue;ctx.fillStyle=e.s==='C'?C.blue:C.green;ctx.beginPath();ctx.moveTo(x,h-8);ctx.lineTo(x-5,h-18);ctx.lineTo(x+5,h-18);ctx.fill();ctx.fillText(e.s,x-3,h-21)}
+  ctx.fillStyle=C.ink2;ctx.fillText('Membranpotential am Axonhügel (mV) · letzte 400 ms',L,h-2)};
+
+/* ---------------- 06 Transmitter & Gifte ---------------- */
+$('#ntTable').insertAdjacentHTML('beforeend',TRANSMITTERS.map(([n,t,wi,f])=>`<tr><td><b>${n}</b></td><td>${t}</td><td><span class="pill ${wi.startsWith('erregend')?'red':wi.startsWith('hemmend')?'blue':'violet'}">${wi}</span></td><td>${f}</td></tr>`).join(''));
+const TF=[['alle','Alle'],['prä','präsynaptisch'],['spalt','synapt. Spalt'],['post','postsynaptisch'],['schlaff','schlaffe Lähmung'],['spastisch','Krämpfe / spastisch']];let tfSel='alle';
+const SITE={nachannel:'Na⁺-Kanäle (Axon)',cachannel:'Ca²⁺-Kanal',vesikel:'Vesikelfreisetzung',reuptake:'Wiederaufnahme-Transporter',enzym:'Abbauenzym (AChE)',rezeptor:'Postsynaptische Rezeptoren'};
+function toxRender(){$('#toxFilters').innerHTML=TF.map(([k,l])=>`<button class="btn ${k===tfSel?'on':''}" data-tf="${k}">${l}</button>`).join('');
+  $$('[data-tf]').forEach(b=>b.onclick=()=>{tfSel=b.dataset.tf;toxRender()});
+  const list=TOXINS.filter(x=>tfSel==='alle'||x.ort===tfSel||x.lahm===tfSel);
+  $('#toxList').innerHTML=list.map(x=>`<div class="toxc" data-n="${x.n}"><h4>${x.n}</h4><span class="pill amber">${x.src}</span><span class="pill">${SITE[x.site]}</span>${x.lahm!=='—'?`<span class="pill ${x.lahm==='schlaff'?'blue':'red'}">${x.lahm}</span>`:''}</div>`).join('');
+  $$('.toxc').forEach(c=>c.onclick=()=>{const x=TOXINS.find(t=>t.n===c.dataset.n);$$('.toxc').forEach(k=>k.classList.toggle('sel',k===c));
+    $$('#toxSvg [data-site]').forEach(e=>e.classList.toggle('hl',e.dataset.site===x.site));$$('#toxSvg [data-site] *').forEach(e=>e.classList.toggle('hl',e.parentNode.dataset.site===x.site));
+    $('#toxInfo').innerHTML=`<h3>${x.n}</h3><div><span class="pill amber">${x.src}</span><span class="pill">Wirkort: ${SITE[x.site]}</span></div><p style="margin:8px 0 0">${x.eff}</p>`})}
+toxRender();
+
+/* ---------------- 07 Gehirn ---------------- */
+$$('#brainSvg .part').forEach(p=>p.addEventListener('click',()=>{$$('#brainSvg .part').forEach(x=>x.classList.remove('sel'));p.classList.add('sel');
+  const [t,d,tags]=BRAIN[p.dataset.region];$('#brainInfo').innerHTML=`<h3>${t}</h3><div>${tags.map(x=>`<span class="pill violet">${x}</span>`).join('')}</div><p style="margin-top:8px">${d}</p>`}));
+const areas=$('#areas');areas.style.pointerEvents='none';
+$('#showAreas').onchange=e=>{areas.style.opacity=e.target.checked?1:0;areas.style.pointerEvents=e.target.checked?'auto':'none';$('#brainLabels').style.opacity=e.target.checked?.25:1};
+$('#innerList').innerHTML=INNER.map(([n,g,d])=>`<div class="toxc" style="cursor:default"><h4>${n}</h4><span class="pill green">${g}</span><p>${d}</p></div>`).join('');
+
+/* ---------------- 08 Sinne ---------------- */
+const SN={buf:[],phase:0,a:40,t:0};const f=S=>22*Math.log10(1+S/4);
+ticks.sinne=(dt)=>{const {ctx,w,h}=fit($('#codeCanvas'));const S=+$('#stim').value;$('#oStim').textContent=S+' %';const ad=$('#adapt').checked;
+  SN.a+=(S-SN.a)*(1-Math.exp(-dt/1500));let RP=ad?0.45*f(S)+Math.max(0,f(S)-f(SN.a))*1.2:f(S);RP=Math.min(RP,40);
+  const freq=Math.max(0,(RP-4)*3.2);SN.t+=dt;SN.phase+=freq*dt/1000;let sp=false;while(SN.phase>=1){SN.phase-=1;sp=true}
+  SN.buf.push({t:SN.t,S,RP,sp});while(SN.buf.length&&SN.buf[0].t<SN.t-2000)SN.buf.shift();
+  $('#mRP').style.width=RP/40*100+'%';$('#mF').style.width=Math.min(100,freq/120*100)+'%';$('#freqOut').textContent=Math.round(freq)+' Hz';
+  const L=110,X=t=>L+(t-(SN.t-2000))/2000*(w-L-10);ctx.clearRect(0,0,w,h);ctx.font='11px IBM Plex Sans';
+  const lanes=[['Reiz',20,80,C.ink2],['Rezeptorpot.',110,80,C.teal],['Aktionspot.',210,70,C.coral]];
+  lanes.forEach(([l,y0,hh,col])=>{ctx.fillStyle='#f4efe4';ctx.fillRect(L,y0,w-L-10,hh);ctx.fillStyle=col;ctx.fillText(l,8,y0+hh/2+4)});
+  const tr=(key,y0,hh,max,col)=>{ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();SN.buf.forEach((b,i)=>{const x=X(b.t),y=y0+hh-b[key]/max*(hh-8)-4;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()};
+  tr('S',20,80,100,C.ink2);tr('RP',110,80,40,C.teal);
+  ctx.strokeStyle=C.coral;ctx.lineWidth=1.6;SN.buf.forEach(b=>{if(b.sp){const x=X(b.t);ctx.beginPath();ctx.moveTo(x,275);ctx.lineTo(x,215);ctx.stroke()}});
+  ctx.fillStyle=C.ink2;ctx.font='10px IBM Plex Mono';ctx.fillText('← letzte 2 s',w-80,h-4)};
+let RF=false;$('#reflexGo').onclick=()=>{if(RF)return;RF=true;const hm=$('#hammer');hm.style.transform='rotate(-25deg)';setTimeout(()=>hm.style.transform='',250);
+  const pulses=$('#pulses');pulses.innerHTML='';const run=(pid,col,t0,dur)=>{const p=$('#'+pid),len=p.getTotalLength(),c=mk(pulses,'circle',{r:7,fill:col,opacity:0});const st=performance.now()+t0;
+    const go=now=>{const k=(now-st)/dur;if(k<0)return requestAnimationFrame(go);if(k>1){c.remove();return}const pt=p.getPointAtLength(k*len);c.setAttribute('cx',pt.x);c.setAttribute('cy',pt.y);c.setAttribute('opacity',1);requestAnimationFrame(go)};requestAnimationFrame(go)};
+  const sp=$('#spindle');sp.setAttribute('ry',32);setTimeout(()=>sp.setAttribute('ry',26),400);
+  run('pAff',C.green,200,900);run('pEff',C.coral,1150,900);run('pInt',C.blue,1150,250);run('pInh',C.violet,1420,900);
+  const ext=$('#reflexSvg ellipse:nth-of-type(1)'),flx=$('#reflexSvg ellipse:nth-of-type(2)');
+  setTimeout(()=>{ext.setAttribute('rx',42);ext.setAttribute('fill','#e0796e');flx.setAttribute('rx',13);flx.setAttribute('fill','#ddd5ee');$('#reflexT').textContent='Strecker kontrahiert, Beuger entspannt – real in ca. 25 ms.'},2050);
+  setTimeout(()=>{ext.setAttribute('rx',34);ext.setAttribute('fill','#e9a6a0');flx.setAttribute('rx',18);flx.setAttribute('fill','#c7b8e4');RF=false},3600);$('#reflexT').textContent='Erregung läuft (Zeitlupe) …'};
+
+/* ---------------- 09 Lernen (NMDA) ---------------- */
+const NM={ph:0};const caDots=Array.from({length:6},()=>mk($('#caFlow'),'circle',{r:4.5,cx:180,cy:0,opacity:0}));
+ticks.lernen=(dt)=>{const V=+$('#vpost').value,glu=$('#gluOn').checked;$('#oVpost').textContent=V+' mV';const B=1/(1+Math.exp(-.062*V)/3.57),open=glu?B:0;
+  $('#nmdaPct').textContent=Math.round(open*100)+' %';$('#mNmda').style.width=open*100+'%';
+  $('#mgDot').setAttribute('cy',120-B*95);$('#mgDot').setAttribute('opacity',1-B*.6);$('#mgLbl').setAttribute('y',124-B*95);
+  $('#gluDot').setAttribute('cy',glu?72:30);$('#gluDot').setAttribute('opacity',glu?1:.25);$('#gluLbl').setAttribute('opacity',glu?1:.4);
+  $('#nmdaState').textContent=!glu?'geschlossen – kein Glutamat':B<.25?'Glutamat ja, aber Mg²⁺ blockiert':'OFFEN → Ca²⁺-Einstrom → LTP';
+  $('#nmdaState').setAttribute('fill',glu&&B>=.25?C.green:C.ink);NM.ph+=dt/900;
+  caDots.forEach((c,i)=>{const k=(NM.ph+i/6)%1;c.setAttribute('cy',60+k*130);c.setAttribute('opacity',i/6<open*1.2?Math.sin(k*Math.PI):0)})};
+
+/* ---------------- 10 Quiz ---------------- */
+const topics=['Alle',...new Set(QUIZ.map(q=>q.t))];let qTopic='Alle',QZ={};
+function quizTopics(){$('#quizTopics').innerHTML=topics.map(t=>`<button class="btn ${t===qTopic?'on':''}" data-qt="${t}">${t}</button>`).join('');$$('[data-qt]').forEach(b=>b.onclick=()=>{qTopic=b.dataset.qt;quizTopics();quizStart()})}
+function quizStart(){const pool=QUIZ.filter(q=>qTopic==='Alle'||q.t===qTopic).map(q=>({...q,ord:[...q.o.keys()].sort(()=>Math.random()-.5)})).sort(()=>Math.random()-.5).slice(0,12);QZ={pool,i:0,score:0};quizQ()}
+function quizQ(){const {pool,i}=QZ;if(i>=pool.length)return quizEnd();const q=pool[i];
+  $('#quizBox').innerHTML=`<div class="qbar"><i style="width:${i/pool.length*100}%"></i></div><div class="hint mono">Frage ${i+1} / ${pool.length} · ${q.t} · Punkte: ${QZ.score}</div><h3 class="q" style="margin-top:8px">${q.q}</h3><div class="opts">${q.ord.map(k=>`<button class="opt" data-k="${k}">${q.o[k]}</button>`).join('')}</div><div id="qExp"></div>`;
+  $$('.opt').forEach(b=>b.onclick=()=>{const k=+b.dataset.k,ok=k===q.a;if(ok)QZ.score++;$$('.opt').forEach(o=>{o.disabled=true;if(+o.dataset.k===q.a)o.classList.add('ok')});if(!ok)b.classList.add('bad');
+    $('#qExp').innerHTML=`<div class="callout ${ok?'':'warn'}"><b>${ok?'Richtig!':'Nicht ganz.'}</b> ${q.e}</div><button class="btn pri" id="qNext">${i+1<pool.length?'Nächste Frage →':'Auswertung'}</button>`;$('#qNext').onclick=()=>{QZ.i++;quizQ()}})}
+function quizEnd(){const {score,pool}=QZ,p=Math.round(score/pool.length*100);const best=store.get('neuro_best',{});if(!best[qTopic]||p>best[qTopic]){best[qTopic]=p;store.set('neuro_best',best)}
+  const note=p>=90?'Hervorragend – abiturreif!':p>=70?'Gut! Ein paar Lücken – das Glossar hilft.':p>=50?'Solide Basis. Schau dir die Module zu den falschen Fragen nochmal an.':'Noch Luft nach oben – geh die Module der Reihe nach durch.';
+  $('#quizBox').innerHTML=`<div class="qbar"><i style="width:100%"></i></div><div style="text-align:center;padding:20px 0"><div class="big">${score} / ${pool.length}</div><p class="lead" style="margin:10px auto">${note}</p><p class="hint">Bestwert (${qTopic}): ${best[qTopic]} %</p><button class="btn pri" id="qAgain">Neue Runde</button></div>`;$('#qAgain').onclick=quizStart}
+quizTopics();quizStart();
+
+/* ---------------- 11 Glossar ---------------- */
+function gl(){const q=$('#glSearch').value.trim().toLowerCase();const list=GLOSSARY.filter(([t,c,d])=>!q||(t+' '+d+' '+c).toLowerCase().includes(q)).sort((a,b)=>a[0].localeCompare(b[0],'de'));
+  $('#glList').innerHTML=list.length?list.map(([t,c,d])=>`<div class="term"><div class="cat">${c}</div><dt>${t}</dt><dd>${d}</dd></div>`).join(''):'<p class="hint">Kein Treffer.</p>'}
+$('#glSearch').addEventListener('input',gl);gl();
+
+route();
+</script></body></html>
